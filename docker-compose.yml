@@ -1,0 +1,41 @@
+services:
+
+  # Database
+  # TODO
+
+  # Server
+  server:
+    container_name: birdcage-server
+    build: server
+    restart: always
+    networks:
+      - bridge
+
+  # Client
+  client:
+    container_name: birdcage-client
+    build: client
+    restart: always
+    environment:
+    # NOTE
+      - ORIGIN=http://localhost:82
+    networks:
+      - bridge
+
+  # NGINX proxy
+  proxy:
+    image: nginx:alpine
+    container_name: birdcage-proxy
+    ports:
+      - "82:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - bridge
+      - nginx
+
+networks:
+  bridge:
+  nginx:
+    external: true
+    name: nginx
