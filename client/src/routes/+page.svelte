@@ -3,4 +3,11 @@
 </script>
 
 <h1>Smart bird cage</h1>
-can connect: {data.canConnect}
+can connect:
+{#await data.response}
+    <span>loading...</span>
+{:then response}
+    <span>{response.status == 200}</span>
+{:catch error}
+    <span>false</span>
+{/await}

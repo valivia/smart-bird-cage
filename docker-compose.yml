@@ -18,7 +18,7 @@ services:
     restart: always
     environment:
     # NOTE
-      - ORIGIN=http://localhost:82
+      - ORIGIN=https://bird.hootsifer.com
     networks:
       - bridge
 
