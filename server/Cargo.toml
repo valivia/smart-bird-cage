@@ -10,6 +10,11 @@ strip = true
 
 
 [dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+rocket-validation = "0.2.0"
+validator = { version = "0.16", features = ["derive"] }
+
 [dependencies.rocket]
 version = "0.5.0"
 default-features = false
