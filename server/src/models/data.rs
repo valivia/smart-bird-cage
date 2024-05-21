@@ -1,33 +1,32 @@
-use rocket_validation::Validate;
-use serde::{Deserialize, Serialize};
+use chrono::{DateTime, FixedOffset};
+use influxdb2::FromDataPoint;
+use serde::Serialize;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Validate)]
-#[serde(crate = "rocket::serde")]
-pub struct SensorData {
-    // Predefined ID on esp
-    device_id: i64,
+use super::device::Device;
 
-    // Movement score from 0 to 1
-    #[validate(range(min = 0.0, max = 1.0))]
-    movement: f64,
+#[derive(Debug, FromDataPoint, Serialize)]
+pub struct Point {
+    pub measurement: String,
+    pub value: f64,
+    pub time: DateTime<FixedOffset>,
+}
 
-    // Temperature in Celsius, DHT 22 sensor
-    #[validate(range(min = -40.0, max = 125.0))]
-    temperature: f64,
+impl Default for Point {
+    fn default() -> Self {
+        Self {
+            measurement: "unknown".to_string(),
+            value: 0.0,
+            time: DateTime::parse_from_rfc3339("1970-01-01T00:00:00Z").unwrap(),
+        }
+    }
+}
 
-    // Humidity in percentage
-    #[validate(range(min = 0.0, max = 100.0))]
-    humidity: f64,
-
-    // Weight in grams, 5KG load cell
-    #[validate(range(min = 0.0, max = 5000.0))]
-    weight: Option<f64>,
-
-    // Light in lux
-    #[validate(range(min = 0))]
-    light: i64,
-
-    // Sound score
-    #[validate(range(min = 0.0, max = 1.0))]
-    sound: f64,
+impl Point {
+    pub fn make_datapoint(device: &Device, name: &str, value: f64) -> influxdb2::models::DataPoint {
+        influxdb2::models::DataPoint::builder(name)
+            .field("value", value)
+            .tag("device_id", device.id.to_string())
+            .build()
+            .unwrap()
+    }
 }

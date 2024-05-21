@@ -1,13 +1,32 @@
 services:
 
   # Database
-  # TODO
+  Database:
+    container_name: birdcage-database
+    image: influxdb:2
+    restart: always
+    ports:
+      - "8086:8086"
+    environment:
+      - username=admin
+      - password=password
+    volumes:
+      - ./database/data:/var/lib/influxdb
+      - ./database/config:/etc/influxdb
+    networks:
+      - bridge
 
   # Server
   server:
     container_name: birdcage-server
     build: server
     restart: always
+    environment:
+      - db_host="http://birdcage-database:8086"
+      - db_org="bird"
+      - db_token="sdDU9Wv8IqSgK37X8PYOGUQ8wF_QvE560lSlFowHBjz41olKk3Uzwti0oTnqTBtwxiS6DpEk4FHaDLWaQIHAZg=="
+      - db_bucket="sensor_data"
+      - origin=https://bird.hootsifer.com
     networks:
       - bridge
 
@@ -17,7 +36,7 @@ services:
     build: client
     restart: always
     environment:
-    # NOTE
+      # NOTE
       - ORIGIN=https://bird.hootsifer.com
     networks:
       - bridge
