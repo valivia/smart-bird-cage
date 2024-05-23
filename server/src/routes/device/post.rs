@@ -1,42 +1,24 @@
-use influxdb2::Client;
-use rocket::{futures::stream, serde::json::Json, State};
+use rocket::{serde::json::Json, State};
 use rocket_validation::Validated;
+use sqlx::Executor;
 
-use crate::{
-    lib::env::Config,
-    models::{data::Point, device::Device, sensor::SensorData},
-};
+use crate::{db::Database, models::device::Device};
 
 #[post("/device", data = "<input>")]
-pub async fn run(
-    env: &State<Config>,
-    db: &State<Client>,
-    device_info: Device,
-    input: Validated<Json<SensorData>>,
-) -> String {
-    println!("Received: {:?}", input);
+pub async fn run(db: &State<Database>, input: Validated<Json<Device>>) -> String {
     let input = input.into_inner();
-    println!("Device: {:?}", device_info);
 
-    let mut points = vec![
-        Point::make_datapoint(&device_info, "light", input.light as f64),
-        Point::make_datapoint(&device_info, "temperature", input.temperature),
-        Point::make_datapoint(&device_info, "humidity", input.humidity),
-        Point::make_datapoint(&device_info, "movement", input.movement),
-        Point::make_datapoint(&device_info, "sound", input.sound),
-    ];
+    let query = sqlx::query!(
+        r#"
+        INSERT INTO device (id, token, bird_name)
+        VALUES ($1, $2, $3)
+        "#,
+        input.id,
+        input.token,
+        input.bird_name
+    );
 
-    if input.weight.is_some() {
-        points.push(Point::make_datapoint(
-            &device_info,
-            "weight",
-            input.weight.unwrap(),
-        ));
-    }
-
-    db.write(&env.db_bucket, stream::iter(points))
-        .await
-        .unwrap();
+    db.pool.execute(query).await.unwrap();
 
     format!("{:?}", input)
 }

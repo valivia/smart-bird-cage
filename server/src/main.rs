@@ -25,8 +25,7 @@ fn rocket() -> _ {
     let env = validate_env();
     let r = rocket::build()
         .manage(env)
-        .attach(db::devices::init())
-        .attach(db::influx::init())
+        .attach(db::initialize())
         .register("/", catchers![not_found])
         .register("/", catchers![rocket_validation::validation_catcher]);
 
