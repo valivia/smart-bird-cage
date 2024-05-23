@@ -2,11 +2,11 @@
 extern crate rocket;
 
 use dotenv::dotenv;
-use lib::env::validate_env;
+use utils::env::validate_env;
 use rocket::serde::json::{json, Value};
 
 mod db;
-mod lib;
+mod utils;
 mod request_guards;
 mod models;
 mod routes;
