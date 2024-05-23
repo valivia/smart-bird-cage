@@ -24,8 +24,6 @@ services:
     container_name: birdcage-server
     build: server
     restart: always
-    ports:
-      - "3000:80"
     environment:
       - DATABASE_URL=postgres://postgres:password@birdcage-database/postgres
       - origin=https://bird.hootsifer.com
