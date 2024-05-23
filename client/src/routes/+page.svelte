@@ -1,4 +1,5 @@
 <script lang="ts">
+    import "../app.css";
     let { data } = $props();
 </script>
 
