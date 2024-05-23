@@ -1,5 +1,6 @@
-use influxdb2::{models::Query, Client};
+use influxdb::{Client, ReadQuery};
 use rocket::{serde::json::Json, State};
+use serde::{Deserialize, Serialize};
 
 use crate::{
     lib::env::Config,
@@ -7,17 +8,15 @@ use crate::{
 };
 
 #[get("/device")]
-pub async fn run(env: &State<Config>, db: &State<Client>, device_info: Device) -> Json<Vec<Point>> {
-    let qs = format!(
-        "from(bucket: \"{}\") 
-        |> range(start: -1w)
-        |> filter(fn: (r) => r.device_id == \"{}\")
-    ",
-        env.db_bucket, device_info.id
-    );
+pub async fn run(env: &State<Config>, db: &State<Client>, device_info: Device) -> String {
+    let read_query = ReadQuery::new("SELECT * FROM sensor_data");
 
-    let query = Query::new(qs.to_string());
-    let res: Vec<Point> = db.query::<Point>(Some(query)).await.unwrap();
+    // Deserialize the result into a vec<Point>
+    let res = db
+        .json_query(read_query)
+        .await
+        .unwrap()
+        .
 
-    Json(res)
+    res
 }

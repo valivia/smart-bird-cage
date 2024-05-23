@@ -1,4 +1,4 @@
-use influxdb2::Client;
+use influxdb::{Client, InfluxDbWriteable};
 use rocket::{futures::stream, serde::json::Json, State};
 use rocket_validation::Validated;
 
@@ -18,25 +18,19 @@ pub async fn run(
     let input = input.into_inner();
     println!("Device: {:?}", device_info);
 
-    let mut points = vec![
-        Point::make_datapoint(&device_info, "light", input.light as f64),
-        Point::make_datapoint(&device_info, "temperature", input.temperature),
-        Point::make_datapoint(&device_info, "humidity", input.humidity),
-        Point::make_datapoint(&device_info, "movement", input.movement),
-        Point::make_datapoint(&device_info, "sound", input.sound),
-    ];
-
-    if input.weight.is_some() {
-        points.push(Point::make_datapoint(
-            &device_info,
-            "weight",
-            input.weight.unwrap(),
-        ));
-    }
-
-    db.write(&env.db_bucket, stream::iter(points))
-        .await
-        .unwrap();
+    db.query(
+        Point {
+            time: chrono::Utc::now(),
+            device_id: device_info.id,
+            weight: input.weight,
+            sound: input.sound,
+            movement: input.movement,
+            temperature: input.temperature,
+            humidity: input.humidity,
+            light: input.light,
+        }
+        .into_query("sensor_data"),
+    ).await.unwrap();
 
     format!("{:?}", input)
 }

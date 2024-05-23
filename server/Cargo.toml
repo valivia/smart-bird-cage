@@ -24,6 +24,7 @@ validator = { version = "0.16", features = ["derive"] }
 influxdb2-structmap = "0.2"
 influxdb2-derive = "0.1.1"
 num-traits = "0.2"
+influxdb = { version = "0.7.2", features = ["derive"] }
 
 [dependencies.rocket]
 version = "0.5.0"

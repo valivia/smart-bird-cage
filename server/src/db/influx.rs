@@ -1,4 +1,4 @@
-use influxdb2::{Client, RequestError};
+use influxdb::{Client, Error};
 use rocket::fairing::AdHoc;
 
 pub fn init() -> AdHoc {
@@ -12,11 +12,9 @@ pub fn init() -> AdHoc {
     })
 }
 
-async fn connect() -> Result<Client, RequestError> {
+async fn connect() -> Result<Client, Error> {
     let host = std::env::var("db_host").unwrap();
-    let org = std::env::var("db_org").unwrap();
-    let token = std::env::var("db_token").unwrap();
-    let client = Client::new(host, org, token);
-    client.health().await?;
+    let client = Client::new(host, "sensor_data");
+    client.ping().await?;
     Ok(client)
 }

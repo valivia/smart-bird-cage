@@ -814,6 +814,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "influxdb"
+version = "0.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "601aa12a5876c044ea2a94a9443d0f086e6fc1f7bb4264bd7120e63c1462d1c8"
+dependencies = [
+ "chrono",
+ "futures-util",
+ "http",
+ "influxdb_derive",
+ "lazy_static",
+ "regex",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "influxdb2"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -860,6 +878,17 @@ dependencies = [
  "chrono",
  "num-traits",
  "ordered-float",
+]
+
+[[package]]
+name = "influxdb_derive"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ac96b3660efd0cde32b0b20bc86cc93f33269cd9f6c97e759e0b0259b2133fb"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.63",
 ]
 
 [[package]]
@@ -1766,6 +1795,7 @@ dependencies = [
  "chrono",
  "dotenv",
  "envy",
+ "influxdb",
  "influxdb2",
  "influxdb2-derive",
  "influxdb2-structmap",
@@ -1954,6 +1984,26 @@ dependencies = [
  "fastrand",
  "rustix",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "thiserror"
+version = "1.0.61"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c546c80d6be4bc6a00c0f01730c08df82eaa7a7a61f11d656526506112cc1709"
+dependencies = [
+ "thiserror-impl",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "1.0.61"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "46c3384250002a6d5af4d114f2845d37b57521033f30d5c3f46c4d70e1197533"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.63",
 ]
 
 [[package]]
