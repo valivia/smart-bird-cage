@@ -2,10 +2,7 @@
 #include <HTTPClient.h>
 #include <WiFiClientSecure.h>
 #include <DHT22.h>
-
-// DHT sensor settings
-#define pinDATA 4
-DHT22 dht22(pinDATA);
+#include "DHT22Measurement.h"
 
 // WiFi credentials
 const char* ssid = "AndroidAP";
@@ -19,7 +16,7 @@ unsigned long timerDelay = 5000; // 5 seconds delay
 
 void setup() {
   Serial.begin(115200);
-  // dht.begin();
+
 
   WiFi.begin(ssid, password);
   Serial.println("Connecting to WiFi...");
@@ -37,8 +34,7 @@ void setup() {
 void loop() {
   // Read sensor values
   int device_id = 1;
-  float temperature = dht22.getTemperature();
-  float humidity = dht22.getHumidity();
+  
   float movement = 0.0;
   float weight = 93.5;
   int light = 0;
@@ -46,6 +42,8 @@ void loop() {
 
   // Send an HTTP POST request every timerDelay milliseconds
   if ((millis() - lastTime) > timerDelay) {
+    float temperature = measureTemperature();
+    float humidity = measureHumidity();
     // Check WiFi connection status
     if (WiFi.status() == WL_CONNECTED) {
       WiFiClientSecure client;
@@ -60,14 +58,13 @@ void loop() {
       http.addHeader("Content-Type", "application/json");
 
       // Construct the JSON string
-      String httpRequestData = "{\"device_id\": " + String(device_id) + ",\"movement\": " + String(movement) + ",\"temperature\": " + String(temperature) + ",\"humidity\": " + String(humidity) + ",\"weight\": " + String(weight) + ",\"light\": " + String(light) + ",\"sound\": " + String(sound) + "}";
-      // String httpRequestData = String("{\"device_id\": ") + String(device_id) + "," +
-      //                    "\"movement\": " + String(movement, 1) + "," +
-      //                    "\"temperature\": " + String(temperature, 1) + "," +
-      //                    "\"humidity\": " + String(humidity, 1) + "," +
-      //                    "\"weight\": " + String(weight, 1) + "," +
-      //                    "\"light\": \"" + String(light) + "\"," +
-      //                    "\"sound\": " + String(sound, 1) + "}";
+      String httpRequestData = "{\"device_id\": " + String(device_id) +
+                               ",\"movement\": " + String(movement) + 
+                               ",\"temperature\": " + String(temperature) + 
+                               ",\"humidity\": " + String(humidity) + 
+                               ",\"weight\": " + String(weight) +
+                                ",\"light\": " + String(light) +
+                                 ",\"sound\": " + String(sound) + "}";
 
       Serial.println("HTTP Request Data:");
       Serial.println(httpRequestData);
