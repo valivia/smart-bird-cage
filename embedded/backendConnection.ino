@@ -1,7 +1,9 @@
+#include <Arduino.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <WiFiClientSecure.h>
 #include "DHT22Measurement.h"
+#include "PIRMeasurement.h"
 
 // // WiFi credentials
 const char* ssid = "AndroidAP";
@@ -11,10 +13,12 @@ const char* password = "qwertyuiop";
 const char* serverName = "https://bird.hootsifer.com/api/v1/data";
 
 unsigned long lastTime = 0;
-const unsigned long timerDelay = 300000; // 5 seconds delay
+const unsigned long timerDelay = 10000; // 5 seconds delay
 
 const unsigned long dhtDelay = 2000;
 unsigned long dhtMeasured = 0;
+
+int movement = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -36,19 +40,23 @@ void setup() {
 void loop() {
   // Read sensor values
   int device_id = 1;
-  float movement = 0.0;
+
   float weight = 93.5;
   int light = 0;
   float sound = 1.0;
 
   unsigned long currentMillis = millis();
 
-  // Measure temp and humidity
+  // Measure temperature and humidity
   if (currentMillis - dhtMeasured >= dhtDelay) {
       temperature = measureTemperature();
       humidity = measureHumidity();
-      dhtMeasured = currentMillis;
+      dhtMeasured = currentMillis; // set the time since measurement to the current time
     }
+
+  // Measure movements
+  checkMovement();
+
 
   // Send an HTTP POST request every timerDelay milliseconds
   if ((millis() - lastTime) > timerDelay) {
@@ -67,6 +75,9 @@ void loop() {
       // Add authorization header
       http.addHeader("Authorization", "beepboopbeepbeep");
      
+      // Update movements
+      movement = returnMovements();
+
       // Construct the JSON string
       String httpRequestData = "{\"device_id\": " + String(device_id) +
                                ",\"movement\": " + String(movement) + 
@@ -83,12 +94,12 @@ void loop() {
       Serial.println("HTTP Request Data:");
       Serial.println(httpRequestData);
       Serial.println(httpResponseCode);
-      // dhtMeasured = 0;
       // Free resources
       http.end();
     } else {
       Serial.println("WiFi Disconnected");
     }
+    movements = 0;
     lastTime = millis();
   }
 }
