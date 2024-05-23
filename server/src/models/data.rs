@@ -1,32 +1,46 @@
-use chrono::{DateTime, FixedOffset};
-use influxdb2::FromDataPoint;
-use serde::Serialize;
+use chrono::Utc;
+use rocket_validation::Validate;
+use serde::{Deserialize, Serialize};
+use sqlx::prelude::FromRow;
 
-use super::device::Device;
+#[derive(Debug, Serialize, Deserialize, Clone, Validate)]
+#[serde(crate = "rocket::serde")]
+pub struct SensorData {
+    // Predefined ID on esp
+    pub device_id: i32,
 
-#[derive(Debug, FromDataPoint, Serialize)]
-pub struct Point {
-    pub measurement: String,
-    pub value: f64,
-    pub time: DateTime<FixedOffset>,
+    // Movement score from 0 to 1
+    #[validate(range(min = 0.0, max = 1.0))]
+    pub movement: f32,
+
+    // Sound score
+    #[validate(range(min = 0.0, max = 1.0))]
+    pub sound: f32,
+
+    // Weight in grams, 5KG load cell
+    #[validate(range(min = 0.0, max = 5000.0))]
+    pub weight: Option<f32>,
+
+    // Temperature in Celsius, DHT 22 sensor
+    #[validate(range(min = -40.0, max = 125.0))]
+    pub temperature: f32,
+
+    // Humidity in percentage
+    #[validate(range(min = 0.0, max = 100.0))]
+    pub humidity: f32,
+
+    // Light in lux
+    #[validate(range(min = 0))]
+    pub light: i32,
 }
 
-impl Default for Point {
-    fn default() -> Self {
-        Self {
-            measurement: "unknown".to_string(),
-            value: 0.0,
-            time: DateTime::parse_from_rfc3339("1970-01-01T00:00:00Z").unwrap(),
-        }
-    }
-}
-
-impl Point {
-    pub fn make_datapoint(device: &Device, name: &str, value: f64) -> influxdb2::models::DataPoint {
-        influxdb2::models::DataPoint::builder(name)
-            .field("value", value)
-            .tag("device_id", device.id.to_string())
-            .build()
-            .unwrap()
-    }
+#[derive(Debug, FromRow, Serialize, Clone)]
+pub struct Datapoint {
+    pub time: chrono::DateTime<Utc>,
+    pub movement: f32,
+    pub sound: f32,
+    pub weight: Option<f32>,
+    pub temperature: f32,
+    pub humidity: f32,
+    pub light: i32,
 }

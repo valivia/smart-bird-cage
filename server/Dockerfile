@@ -18,6 +18,7 @@ RUN rm src/main.rs
 
 # Copy the actual code files and build the application
 COPY src ./src/
+COPY .env .env
 # Update the file date
 RUN touch src/main.rs
 RUN cargo build --release
