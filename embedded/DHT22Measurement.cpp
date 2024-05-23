@@ -12,9 +12,6 @@ float temperature = -1;
 float humidity = -1;
 
 void setupDHT22() {
-  Serial.begin(115200);
-  Serial.println("Starting measurement for DHT22");
-
   // Initialize the DHT sensor
   dht.begin();
 }

@@ -1,22 +1,24 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <WiFiClientSecure.h>
-#include <DHT22.h>
 #include "DHT22Measurement.h"
 
-// WiFi credentials
+// // WiFi credentials
 const char* ssid = "AndroidAP";
 const char* password = "qwertyuiop";
 
-// Server settings
-const char* serverName = "https://bird.hootsifer.com/api/v1/device";
+// // Server settings
+const char* serverName = "https://bird.hootsifer.com/api/v1/data";
 
 unsigned long lastTime = 0;
-unsigned long timerDelay = 5000; // 5 seconds delay
+const unsigned long timerDelay = 300000; // 5 seconds delay
+
+const unsigned long dhtDelay = 2000;
+unsigned long dhtMeasured = 0;
 
 void setup() {
   Serial.begin(115200);
-
+  setupDHT22();
 
   WiFi.begin(ssid, password);
   Serial.println("Connecting to WiFi...");
@@ -34,16 +36,22 @@ void setup() {
 void loop() {
   // Read sensor values
   int device_id = 1;
-  
   float movement = 0.0;
   float weight = 93.5;
   int light = 0;
-  float sound = 40.0;
+  float sound = 1.0;
+
+  unsigned long currentMillis = millis();
+
+  // Measure temp and humidity
+  if (currentMillis - dhtMeasured >= dhtDelay) {
+      temperature = measureTemperature();
+      humidity = measureHumidity();
+      dhtMeasured = currentMillis;
+    }
 
   // Send an HTTP POST request every timerDelay milliseconds
   if ((millis() - lastTime) > timerDelay) {
-    float temperature = measureTemperature();
-    float humidity = measureHumidity();
     // Check WiFi connection status
     if (WiFi.status() == WL_CONNECTED) {
       WiFiClientSecure client;
@@ -56,7 +64,9 @@ void loop() {
 
       // Specify content-type header
       http.addHeader("Content-Type", "application/json");
-
+      // Add authorization header
+      http.addHeader("Authorization", "beepboopbeepbeep");
+     
       // Construct the JSON string
       String httpRequestData = "{\"device_id\": " + String(device_id) +
                                ",\"movement\": " + String(movement) + 
@@ -66,13 +76,14 @@ void loop() {
                                 ",\"light\": " + String(light) +
                                  ",\"sound\": " + String(sound) + "}";
 
+      
+
+  //     // Send HTTP POST request
+      int httpResponseCode = http.POST(httpRequestData);
       Serial.println("HTTP Request Data:");
       Serial.println(httpRequestData);
-
-      // Send HTTP POST request
-      int httpResponseCode = http.POST(httpRequestData);
       Serial.println(httpResponseCode);
-
+      // dhtMeasured = 0;
       // Free resources
       http.end();
     } else {
