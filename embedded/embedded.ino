@@ -5,6 +5,8 @@
 #include "DHT22Measurement.h"
 #include "PIRMeasurement.h"
 
+#define LDRpin 32
+
 // // WiFi credentials
 const char* ssid = "AndroidAP";
 const char* password = "qwertyuiop";
@@ -20,9 +22,12 @@ unsigned long dhtMeasured = 0;
 
 int movement = 0;
 
+int light = 0;
+
 void setup() {
   Serial.begin(115200);
   setupDHT22();
+  setupPIR();
 
   WiFi.begin(ssid, password);
   Serial.println("Connecting to WiFi...");
@@ -38,11 +43,10 @@ void setup() {
 }
 
 void loop() {
+  
   // Read sensor values
   int device_id = 1;
-
   float weight = 93.5;
-  int light = 0;
   float sound = 1.0;
 
   unsigned long currentMillis = millis();
@@ -77,6 +81,9 @@ void loop() {
      
       // Update movements
       movement = returnMovements();
+
+      // Measure Light value
+      light = analogRead(LDRpin);
 
       // Construct the JSON string
       String httpRequestData = "{\"device_id\": " + String(device_id) +
