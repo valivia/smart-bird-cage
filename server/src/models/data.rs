@@ -9,10 +9,6 @@ pub struct SensorData {
     // Predefined ID on esp
     pub device_id: i32,
 
-    // Sound score
-    #[validate(range(min = 0.0, max = 1.0))]
-    pub sound: f32,
-
     // Weight in grams, 5KG load cell
     #[validate(range(min = 0.0, max = 5000.0))]
     pub weight: Option<f32>,
@@ -20,6 +16,10 @@ pub struct SensorData {
     // Amount of movements
     #[validate(range(min = 0))]
     pub movement: i32,
+
+    // Amount of sounds measured
+    #[validate(range(min = 0))]
+    pub sound: i32,
 
     // Temperature in Celsius, DHT 22 sensor
     #[validate(range(min = -40.0, max = 125.0))]
@@ -38,7 +38,7 @@ pub struct SensorData {
 pub struct Datapoint {
     pub time: chrono::DateTime<Utc>,
     pub movement: i32,
-    pub sound: f32,
+    pub sound: i32,
     pub weight: Option<f32>,
     pub temperature: f32,
     pub humidity: f32,
@@ -49,7 +49,7 @@ pub struct Datapoint {
 pub struct DataPointAverage {
     pub time: Option<chrono::NaiveDate>,
     pub movement: Option<i32>,
-    pub sound: Option<f64>,
+    pub sound: Option<i32>,
     pub weight: Option<f64>,
     pub temperature: Option<f64>,
     pub humidity: Option<f64>,
@@ -65,7 +65,7 @@ impl From<DataPointAverage> for Datapoint {
                 .map(|t| t.and_hms_opt(0, 0, 0).unwrap().and_utc())
                 .unwrap(),
             movement: average.movement.unwrap_or(0),
-            sound: average.sound.unwrap_or(0.0) as f32,
+            sound: average.sound.unwrap_or(0),
             weight: average.weight.map(|w| w as f32),
             temperature: average.temperature.unwrap_or(0.0) as f32,
             humidity: average.humidity.unwrap_or(0.0) as f32,

@@ -27,11 +27,11 @@ pub async fn run(
             r#"
                 SELECT 
                     time::date,
-                    AVG(sound) as sound,
                     AVG(weight) as weight,
                     AVG(humidity) as humidity,
                     AVG(temperature) as temperature,
                     CAST(AVG(light) AS INTEGER) as light,
+                    CAST(AVG(sound) AS INTEGER)  as sound,
                     CAST(AVG(movement) AS INTEGER) as movement
 
                 FROM data
