@@ -1,14 +1,2 @@
-<script lang="ts">
-    import "../app.css";
-    let { data } = $props();
-</script>
-
-<h1>Smart bird cage</h1>
-can connect:
-{#await data.response}
-    <span>loading...</span>
-{:then response}
-    <span>{response.status == 200}</span>
-{:catch error}
-    <span>false</span>
-{/await}
+<h1>Welcome to SvelteKit</h1>
+<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
