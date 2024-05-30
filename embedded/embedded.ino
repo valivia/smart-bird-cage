@@ -4,8 +4,11 @@
 #include <WiFiClientSecure.h>
 #include "DHT22Measurement.h"
 #include "PIRMeasurement.h"
+#include "HX711.h"
 
-#define LDRpin 32
+#define LDRpin 35
+
+int device_id = 1;
 
 // // WiFi credentials
 const char* ssid = "AndroidAP";
@@ -27,10 +30,20 @@ int movement = 0;
 int light = 0;
 int lux = 0;
 
+// Loadcell
+HX711 scale;
+uint8_t dataPin = 19;
+uint8_t clockPin = 21;
+float measuredWeight = -1.0;
+float weight = -1.0;
+
 void setup() {
   Serial.begin(115200);
+  
   setupDHT22();
   setupPIR();
+  scale.begin(dataPin, clockPin);
+  scale.calibrate_scale(1000, 5); // MOET NOG GECALIBREERD WORDEN!!!!
 
   WiFi.begin(ssid, password);
   Serial.println("Connecting to WiFi...");
@@ -47,10 +60,8 @@ void setup() {
 
 void loop() {
   
-  // Read sensor values
-  int device_id = 1;
-  float weight = 93.5;
-  float sound = 1.0;
+  // NOG TE FIXEN SENSORS
+  int sound = 1;
 
   unsigned long currentMillis = millis();
 
@@ -64,6 +75,12 @@ void loop() {
   // Measure movements
   checkMovement();
 
+  // Measure Weight
+  measuredWeight = scale.get_units(5);
+  // Check if bird is there
+  if (measuredWeight > 10){
+    weight = measuredWeight;
+  }
 
   // Send an HTTP POST request every timerDelay milliseconds
   if ((millis() - lastTime) > timerDelay) {
