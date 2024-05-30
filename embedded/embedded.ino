@@ -15,14 +15,17 @@ const char* password = "qwertyuiop";
 const char* serverName = "https://bird.hootsifer.com/api/v1/data";
 
 unsigned long lastTime = 0;
-const unsigned long timerDelay = 10000; // 5 seconds delay
+const unsigned long timerDelay = 10000; // 10 seconds delay
 
 const unsigned long dhtDelay = 2000;
 unsigned long dhtMeasured = 0;
 
+// PIR
 int movement = 0;
 
+// LDR
 int light = 0;
+int lux = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -39,7 +42,7 @@ void setup() {
   Serial.print("Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
 
-  Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
+  Serial.println("Timer set to 10 seconds (timerDelay variable), it will take 10 seconds before publishing the first reading.");
 }
 
 void loop() {
@@ -84,6 +87,7 @@ void loop() {
 
       // Measure Light value
       light = analogRead(LDRpin);
+      lux = light / 4.45; // calibrated to convert raw ldr value to lux with 10k Ohm resistor
 
       // Construct the JSON string
       String httpRequestData = "{\"device_id\": " + String(device_id) +
@@ -91,7 +95,7 @@ void loop() {
                                ",\"temperature\": " + String(temperature) + 
                                ",\"humidity\": " + String(humidity) + 
                                ",\"weight\": " + String(weight) +
-                                ",\"light\": " + String(light) +
+                                ",\"light\": " + String(lux) +
                                  ",\"sound\": " + String(sound) + "}";
 
       
