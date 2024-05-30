@@ -44,3 +44,32 @@ pub struct Datapoint {
     pub humidity: f32,
     pub light: i32,
 }
+
+#[derive(Debug, FromRow, Clone)]
+pub struct DataPointAverage {
+    pub time: Option<chrono::NaiveDate>,
+    pub movement: Option<i32>,
+    pub sound: Option<f64>,
+    pub weight: Option<f64>,
+    pub temperature: Option<f64>,
+    pub humidity: Option<f64>,
+    pub light: Option<i32>,
+}
+
+// Convert from datapointaverage to datapoint
+impl From<DataPointAverage> for Datapoint {
+    fn from(average: DataPointAverage) -> Self {
+        Datapoint {
+            time: average
+                .time
+                .map(|t| t.and_hms_opt(0, 0, 0).unwrap().and_utc())
+                .unwrap(),
+            movement: average.movement.unwrap_or(0),
+            sound: average.sound.unwrap_or(0.0) as f32,
+            weight: average.weight.map(|w| w as f32),
+            temperature: average.temperature.unwrap_or(0.0) as f32,
+            humidity: average.humidity.unwrap_or(0.0) as f32,
+            light: average.light.unwrap_or(0),
+        }
+    }
+}
