@@ -2,14 +2,15 @@
 extern crate rocket;
 
 use dotenv::dotenv;
-use lib::env::validate_env;
 use rocket::serde::json::{json, Value};
+use utils::env::validate_env;
 
 mod db;
-mod lib;
-mod request_guards;
+mod fairings;
 mod models;
+mod request_guards;
 mod routes;
+mod utils;
 
 #[catch(404)]
 fn not_found() -> Value {
@@ -19,14 +20,20 @@ fn not_found() -> Value {
     })
 }
 
+#[options("/<_..>")]
+fn all_options() {
+    /* Intentionally left empty */
+}
+
 #[launch]
 fn rocket() -> _ {
     dotenv().ok();
     let env = validate_env();
     let r = rocket::build()
         .manage(env)
-        .attach(db::devices::init())
-        .attach(db::influx::init())
+        .attach(fairings::db::initialize())
+        .attach(fairings::cors::Cors)
+        .mount("/", routes![all_options])
         .register("/", catchers![not_found])
         .register("/", catchers![rocket_validation::validation_catcher]);
 

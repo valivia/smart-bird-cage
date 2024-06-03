@@ -2,19 +2,22 @@ services:
 
   # Database
   Database:
+    image: postgres:13
     container_name: birdcage-database
-    image: influxdb:2
     restart: always
     ports:
-      - "8086:8086"
-    environment:
-      - username=admin
-      - password=password
+      - "9033:5432"
     volumes:
-      - ./database/data:/var/lib/influxdb
-      - ./database/config:/etc/influxdb
+      - ./database:/var/lib/postgresql/data:rw
+    environment:
+      POSTGRES_PASSWORD: password
     networks:
       - bridge
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Server
   server:
@@ -22,10 +25,7 @@ services:
     build: server
     restart: always
     environment:
-      - db_host="http://birdcage-database:8086"
-      - db_org="bird"
-      - db_token="sdDU9Wv8IqSgK37X8PYOGUQ8wF_QvE560lSlFowHBjz41olKk3Uzwti0oTnqTBtwxiS6DpEk4FHaDLWaQIHAZg=="
-      - db_bucket="sensor_data"
+      - DATABASE_URL=postgres://postgres:password@birdcage-database/postgres
       - origin=https://bird.hootsifer.com
     networks:
       - bridge

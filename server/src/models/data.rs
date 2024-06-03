@@ -1,32 +1,75 @@
-use chrono::{DateTime, FixedOffset};
-use influxdb2::FromDataPoint;
-use serde::Serialize;
+use chrono::Utc;
+use rocket_validation::Validate;
+use serde::{Deserialize, Serialize};
+use sqlx::prelude::FromRow;
 
-use super::device::Device;
+#[derive(Debug, Serialize, Deserialize, Clone, Validate)]
+#[serde(crate = "rocket::serde")]
+pub struct SensorData {
+    // Predefined ID on esp
+    pub device_id: i32,
 
-#[derive(Debug, FromDataPoint, Serialize)]
-pub struct Point {
-    pub measurement: String,
-    pub value: f64,
-    pub time: DateTime<FixedOffset>,
+    // Weight in grams, 5KG load cell
+    #[validate(range(min = 0.0, max = 5000.0))]
+    pub weight: Option<f32>,
+
+    // Amount of movements
+    #[validate(range(min = 0))]
+    pub movement: i32,
+
+    // Amount of sounds measured
+    #[validate(range(min = 0))]
+    pub sound: i32,
+
+    // Temperature in Celsius, DHT 22 sensor
+    #[validate(range(min = -40.0, max = 125.0))]
+    pub temperature: f32,
+
+    // Humidity in percentage
+    #[validate(range(min = 0.0, max = 100.0))]
+    pub humidity: f32,
+
+    // Light in lux
+    #[validate(range(min = 0))]
+    pub light: i32,
 }
 
-impl Default for Point {
-    fn default() -> Self {
-        Self {
-            measurement: "unknown".to_string(),
-            value: 0.0,
-            time: DateTime::parse_from_rfc3339("1970-01-01T00:00:00Z").unwrap(),
+#[derive(Debug, FromRow, Serialize, Clone)]
+pub struct Datapoint {
+    pub time: chrono::DateTime<Utc>,
+    pub movement: i32,
+    pub sound: i32,
+    pub weight: Option<f32>,
+    pub temperature: f32,
+    pub humidity: f32,
+    pub light: i32,
+}
+
+#[derive(Debug, FromRow, Clone)]
+pub struct DataPointAverage {
+    pub time: Option<chrono::NaiveDate>,
+    pub movement: Option<i32>,
+    pub sound: Option<i32>,
+    pub weight: Option<f64>,
+    pub temperature: Option<f64>,
+    pub humidity: Option<f64>,
+    pub light: Option<i32>,
+}
+
+// Convert from datapointaverage to datapoint
+impl From<DataPointAverage> for Datapoint {
+    fn from(average: DataPointAverage) -> Self {
+        Datapoint {
+            time: average
+                .time
+                .map(|t| t.and_hms_opt(0, 0, 0).unwrap().and_utc())
+                .unwrap(),
+            movement: average.movement.unwrap_or(0),
+            sound: average.sound.unwrap_or(0),
+            weight: average.weight.map(|w| w as f32),
+            temperature: average.temperature.unwrap_or(0.0) as f32,
+            humidity: average.humidity.unwrap_or(0.0) as f32,
+            light: average.light.unwrap_or(0),
         }
-    }
-}
-
-impl Point {
-    pub fn make_datapoint(device: &Device, name: &str, value: f64) -> influxdb2::models::DataPoint {
-        influxdb2::models::DataPoint::builder(name)
-            .field("value", value)
-            .tag("device_id", device.id.to_string())
-            .build()
-            .unwrap()
     }
 }
