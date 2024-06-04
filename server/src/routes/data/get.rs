@@ -7,7 +7,7 @@ use crate::{
 };
 
 #[get("/data?<start>&<end>&<average>")]
-pub async fn run(
+pub async fn get(
     db: &State<Database>,
     device_info: Device,
     start: Option<i64>,
@@ -65,6 +65,26 @@ pub async fn run(
         .await
         .unwrap(),
     };
+
+    Json(data)
+}
+
+#[get("/data/last")]
+pub async fn get_last(db: &State<Database>, device_info: Device) -> Json<Datapoint> {
+    let data = sqlx::query_as!(
+        Datapoint,
+        r#"
+            SELECT time, movement, sound, weight, temperature, humidity, light
+            FROM data
+            WHERE device_id = $1
+            ORDER BY time DESC
+            LIMIT 1
+        "#,
+        device_info.id,
+    )
+    .fetch_one(&db.pool)
+    .await
+    .unwrap();
 
     Json(data)
 }
