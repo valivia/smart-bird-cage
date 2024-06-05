@@ -1,6 +1,7 @@
 <script>
   export let values;
   export let timeStamps;
+  export let xaxis;
   
   import { Chart, Card, A, Button, Dropdown, DropdownItem, Popover } from 'flowbite-svelte';
   import { InfoCircleSolid, ChevronRightOutline, ChevronDownOutline, FileLinesSolid } from 'flowbite-svelte-icons';
@@ -12,7 +13,6 @@
       type: 'line',
       fontFamily: 'Inter, sans-serif',
       foreColor: 'currentColor',
-      //TOFIX ^^^
       dropShadow: {
         enabled: false
       },
@@ -54,8 +54,9 @@
     },
     xaxis: {
       categories: timeStamps,
+      overwriteCategories: xaxis,
       labels: {
-        show: false,
+        show: true,
         style: {
           fontFamily: 'Inter, sans-serif',
           cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'

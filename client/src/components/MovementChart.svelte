@@ -12,7 +12,6 @@
       width: '100%',
       fontFamily: 'Inter, sans-serif',
       foreColor: 'currentColor',
-        //TOFIX ^^^
       toolbar: {
         show: false
       }

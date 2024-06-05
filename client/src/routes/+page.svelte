@@ -7,40 +7,72 @@
     import WeightChart from "../components/WeightChart.svelte";
 
     import { onMount } from "svelte";
-    
-    let url = 'https://bird.hootsifer.com/api/v1/data';
 
-    let data = [];
-
-    let humidityValues = [];
-    let temperatureValues = [];
-    let lightValues = [];
-    let weightValues = [];
-    let movementValues = [];
-    let soundValues = [];
-    let timeStamps = [];
-    let test = [];
-
-    const intervalInSeconds = 300
-    const amountOfValues = 24 * 60 * 60 / intervalInSeconds
-
-    const getElements = (count: number, array: []) => {
-    // Calculate the step size based on the desired count and the length of the array
-        const step = Math.floor((array.length - 1) / (count - 1));
-        // Create a new array with the selected elements
-        const result = Array.from({ length: count }, (_, index) => array[index * step]);
-        return result;
+    interface SensorData{
+        humidity: number;
+        temperature: number;
+        light: number;
+        weight: number;
+        movement: number;
+        sound: number;
+        time: string;
     }
 
-    onMount(async () => {
+    const baseURL = 'https://bird.hootsifer.com/api/v1/data';
+    const fetchIntervalSeconds = 300;
+    const secondsInDay = 24 * 60 * 60;
+    const currentTimeEpochSeconds = Date.now() / 1000;
+
+    let timeSeriesURL = `${baseURL}?start=${currentTimeEpochSeconds - secondsInDay}`
+    let lastValueURL = `${baseURL}/last`
+
+    let data: SensorData[];
+
+    let humidityValues: number[];
+    let temperatureValues: number[];
+    let lightValues: number[];
+    let weightValues: number[];
+    let movementValues: number[];
+    let soundValues: number[];
+    let timeStamps: string[];
+    let xaxis: string[];
+
+    const fetchData = async (url: string) => {
         const response = await fetch(url, {
             method: "GET",
             headers: {
                 "Authorization": "beepboopbeepbeep",
             },
         });
-        data = await response.json();
+        return response.json();
+    };
 
+    const appendLastValue = (lastValue: SensorData) => {
+        data = [...data.slice(1), lastValue]
+    }
+
+    onMount(() => {
+        const initializeData = async () => {
+            data = await fetchData(timeSeriesURL);
+
+            const interval = setInterval(async () => {
+                const lastValue = await fetchData(lastValueURL);
+                appendLastValue(lastValue);
+            }, fetchIntervalSeconds * 1000);
+
+            return () => clearInterval(interval);
+        };
+
+        initializeData().catch(console.error);
+    });
+
+    const getElements = (count: number, timeStamps: any[]): any[] => {
+        const step = Math.floor((timeStamps.length - 1) / (count - 1));
+        const result = Array.from({ length: count }, (_, index) => timeStamps[index * step]);
+        return result;
+    }
+
+    const dataChanged = () => {
         humidityValues = data.map(({ humidity }) => humidity);
         temperatureValues = data.map(({ temperature }) => temperature);
         lightValues = data.map(({ light }) => light);
@@ -49,26 +81,19 @@
         soundValues = data.map(({ sound }) => sound);
         timeStamps = data.map(({ time }) => new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
-        console.log(timeStamps)
-
-        test = getElements(6, timeStamps)
-
-        console.log(test)
-
-    });
-
-    const get24HData = (values) => {
-        return values.slice(Math.max(values.length - amountOfValues, 0))
+        xaxis = getElements(6, timeStamps)
     }
+
+    $: data && dataChanged();
 </script>
 
-<h1 class="text-white">24H + data date</h1>
+<h1 class="text-white">Afgelopen 24 uur</h1>
 
 <main class="grid gap-10 m-20 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-    <HumidityChart values={get24HData(humidityValues)} timeStamps={get24HData((timeStamps))} tests={test} />
-    <TemperatureChart values={get24HData(temperatureValues)} timeStamps={get24HData((timeStamps))}  />
-    <LightChart values={get24HData(lightValues)} timeStamps={get24HData((timeStamps))} />
-    <WeightChart values={get24HData(weightValues)} timeStamps={get24HData((timeStamps))} />
-    <MovementChart values={get24HData(movementValues)} timeStamps={get24HData((timeStamps))}  />
-    <SoundChart values={get24HData(soundValues)} timeStamps={get24HData((timeStamps))} />
+    <HumidityChart values={humidityValues} {timeStamps} {xaxis}/>
+    <TemperatureChart values={(temperatureValues)} {timeStamps} {xaxis}  />
+    <LightChart values={lightValues} {timeStamps} {xaxis} />
+    <WeightChart values={weightValues} {timeStamps} {xaxis} />
+    <MovementChart values={movementValues} {timeStamps}  />
+    <SoundChart values={soundValues} {timeStamps} />
 </main>
