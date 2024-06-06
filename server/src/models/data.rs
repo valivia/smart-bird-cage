@@ -66,9 +66,12 @@ impl From<DataPointAverage> for Datapoint {
                 .unwrap(),
             movement: average.movement.unwrap_or(0),
             sound: average.sound.unwrap_or(0),
-            weight: average.weight.map(|w| w as f32),
-            temperature: average.temperature.unwrap_or(0.0) as f32,
-            humidity: average.humidity.unwrap_or(0.0) as f32,
+            weight: average
+                .weight
+                .map(|w| w as f32)
+                .map(|w| (w * 10.0).round() / 10.0),
+            temperature: (average.temperature.unwrap_or(0.0) as f32 * 10.0).round() / 10.0,
+            humidity: (average.humidity.unwrap_or(0.0) as f32 * 10.0).round() / 10.0,
             light: average.light.unwrap_or(0),
         }
     }
