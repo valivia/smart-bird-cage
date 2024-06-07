@@ -5,8 +5,10 @@
 #include "DHT22Measurement.h"
 #include "PIRMeasurement.h"
 #include "HX711.h"
+#include "Microphone.h"
 
-#define LDRpin 35
+
+#define LDRpin 23 // Don't choose an ADC pin for the LDR
 
 int device_id = 1;
 
@@ -37,11 +39,14 @@ uint8_t clockPin = 21;
 float measuredWeight = -1.0;
 float weight = -1.0;
 
+int sound = 0;
+
 void setup() {
   Serial.begin(115200);
   
   setupDHT22();
   setupPIR();
+  setupMic();
   scale.begin(dataPin, clockPin);
   scale.calibrate_scale(1000, 5); // MOET NOG GECALIBREERD WORDEN!!!!
 
@@ -61,8 +66,10 @@ void setup() {
 void loop() {
   
   // NOG TE FIXEN SENSORS
-  int sound = 1;
-
+  listen();
+  if (listen() == true) {
+    sound++;
+  }
   unsigned long currentMillis = millis();
 
   // Measure temperature and humidity
@@ -72,10 +79,10 @@ void loop() {
       dhtMeasured = currentMillis; // set the time since measurement to the current time
     }
 
-  // Measure movements
+  // // Measure movements
   checkMovement();
 
-  // Measure Weight
+  // // Measure Weight
   measuredWeight = scale.get_units(5);
   // Check if bird is there
   if (measuredWeight > 10){
@@ -103,8 +110,9 @@ void loop() {
       movement = returnMovements();
 
       // Measure Light value
-      light = analogRead(LDRpin);
+      // light = analogRead(LDRpin);
       lux = light / 4.45; // calibrated to convert raw ldr value to lux with 10k Ohm resistor
+      
 
       // Construct the JSON string
       String httpRequestData = "{\"device_id\": " + String(device_id) +
@@ -117,7 +125,7 @@ void loop() {
 
       
 
-  //     // Send HTTP POST request
+      // Send HTTP POST request
       int httpResponseCode = http.POST(httpRequestData);
       Serial.println("HTTP Request Data:");
       Serial.println(httpRequestData);
@@ -127,7 +135,9 @@ void loop() {
     } else {
       Serial.println("WiFi Disconnected");
     }
+    // Reset measurements
     movements = 0;
+    sound = 0;
     lastTime = millis();
   }
 }
