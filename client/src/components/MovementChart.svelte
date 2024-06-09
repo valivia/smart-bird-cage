@@ -4,6 +4,7 @@
 
   export let values;
   export let timeStamps;
+  export let xaxis;
 
   $: options = {
     chart: {
@@ -29,15 +30,7 @@
       {
         name: 'Movement',
         color: '#FDBA8C',
-        data: [
-          { x: 'Mon', y: 231 },
-          { x: 'Tue', y: 122 },
-          { x: 'Wed', y: 63 },
-          { x: 'Thu', y: 421 },
-          { x: 'Fri', y: 122 },
-          { x: 'Sat', y: 323 },
-          { x: 'Sun', y: 111 }
-        ]
+        data: values
       },
     ],
     plotOptions: {
@@ -90,7 +83,8 @@
       }
     },
     yaxis: {
-      show: true
+      show: true,
+      stepSize: 1,
     },
     fill: {
       opacity: 1

@@ -6,7 +6,6 @@
   export let timeStamps;
 
   $: options = {
-    colors: ['#eeeeee'],
     chart: {
       type: 'bar',
       height: '400px',
