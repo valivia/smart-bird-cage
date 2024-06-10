@@ -11,7 +11,7 @@
 
     export let data: object[];
     export let timeStamps: string[];
-    export let xaxis;
+    export let xaxis: string[] | undefined = undefined;
   
     $: options = {
       chart: {

@@ -8,7 +8,7 @@
     import LineChart from "../../components/LineChart.svelte";
     import ColumnChart from "../../components/ColumnChart.svelte";
 
-    const fetchIntervalSeconds = 300;
+    const fetchIntervalSeconds = 10;
     const secondsInDay = 24 * 60 * 60;
     const currentTimeEpochSeconds = Date.now() / 1000;
 
@@ -30,8 +30,6 @@
     onMount(() => {
         const initializeData = async () => {
             data = await fetchData(API_URLS.PERIOD(currentTimeEpochSeconds - secondsInDay));
-
-            console.log(API_URLS.PERIOD(currentTimeEpochSeconds - secondsInDay))
 
             const interval = setInterval(async () => {
                 const lastValue = await fetchData(API_URLS.LAST);
@@ -56,10 +54,11 @@
         temperatureValues = data.map(({ temperature }) => temperature);
         lightValues = data.map(({ light }) => light);
         weightValues = data.map(({ weight }) => weight);
-        soundValues = data.map(({ sound }, index) => ({y: sound, x: timeStamps[index]})).slice(-16);
-        movementValues = data.map(({ movement }, index) => ({y: movement, x: timeStamps[index]})).slice(-16);
+        soundValues = data.map(({ sound }) => sound);
+        // soundValues = data.map(({ sound }, index) => ({y: sound, x: timeStamps[index]}));
+        movementValues = data.map(({ movement }, index) => ({y: movement, x: timeStamps[index]}));
 
-        console.log(humidityValues)
+        console.log(soundValues)
 
         xaxis = getElements(6, timeStamps)
     }
@@ -74,6 +73,8 @@
     <LineChart name='Temperature' unit='°C' data={temperatureValues} {timeStamps} {xaxis} color='#f05252' />
     <LineChart name='Light' unit='LUX' data={lightValues} {timeStamps} {xaxis} color='#6af7bb' />
     <LineChart name='Weight' unit='g' data={weightValues} {timeStamps} {xaxis} color='#be8fff' />
-    <ColumnChart name='Movement' data={movementValues} {timeStamps} {xaxis} color='#fdba3c' />
-    <ColumnChart name='Sound' data={soundValues} {timeStamps} {xaxis} color='#5deffe' />
+    <LineChart name='Sound' unit='x' data={soundValues} {timeStamps} {xaxis} min={0} max={10} color='#5deffe' />
+
+    <!-- <ColumnChart name='Movement' data={movementValues} {timeStamps} {xaxis} color='#fdba3c' /> -->
+    <!-- <ColumnChart name='Sound' data={soundValues} {timeStamps} {xaxis} color='#5deffe' /> -->
 </main>
