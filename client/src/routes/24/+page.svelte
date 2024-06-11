@@ -8,7 +8,7 @@
     import LineChart from "../../components/LineChart.svelte";
     import ColumnChart from "../../components/ColumnChart.svelte";
 
-    const fetchIntervalSeconds = 10;
+    const fetchIntervalSeconds = 300;
     const secondsInDay = 24 * 60 * 60;
     const currentTimeEpochSeconds = Date.now() / 1000;
 
@@ -57,8 +57,6 @@
         soundValues = data.map(({ sound }) => sound);
         // soundValues = data.map(({ sound }, index) => ({y: sound, x: timeStamps[index]}));
         movementValues = data.map(({ movement }, index) => ({y: movement, x: timeStamps[index]}));
-
-        console.log(soundValues)
 
         xaxis = getElements(6, timeStamps)
     }
