@@ -23,13 +23,9 @@ const unsigned long timerDelay = 10000; // 10 seconds delay
 const unsigned long dhtDelay = 2000;
 unsigned long dhtMeasured = 0;
 
-// PIR
-int movement = 0;
-
 // LDR
 int light = 0;
 int lux = 0;
-
 
 // Loadcell
 HX711 scale;
@@ -44,8 +40,8 @@ void setup() {
   Serial.begin(115200);
   pinMode(LDRpin, INPUT);
   setupDHT22();
-  setupPIR();
   setupMic();
+  setupRadar();
   scale.begin(dataPin, clockPin);
   scale.calibrate_scale(1000, 5); // MOET NOG GECALIBREERD WORDEN!!!!
 
@@ -79,7 +75,7 @@ void loop() {
     }
 
   // // Measure movements
-  checkMovement();
+  runRadarLoop();
 
   // // Measure Weight
   measuredWeight = scale.get_units(5);
@@ -106,7 +102,7 @@ void loop() {
       http.addHeader("Authorization", token);
      
       // Update movements
-      movement = returnMovements();
+      int movement = getRadarScore();
 
       // Measure Light value
       // int light = analogRead(LDRpin); // Read LDR value
@@ -126,8 +122,6 @@ void loop() {
                                 ",\"light\": " + String(lux) +
                                  ",\"sound\": " + String(sound) + "}";
 
-      
-
       // Send HTTP POST request
       int httpResponseCode = http.POST(httpRequestData);
       Serial.println("HTTP Request Data:");
@@ -140,7 +134,6 @@ void loop() {
       Serial.println("WiFi Disconnected");
     }
     // Reset measurements
-    movements = 0;
     sound = 0;
     lastTime = millis();
   }
