@@ -103,7 +103,7 @@ void loop() {
       // Specify content-type header
       http.addHeader("Content-Type", "application/json");
       // Add authorization header
-      http.addHeader("Authorization", "beepboopbeepbeep");
+      http.addHeader("Authorization", token);
      
       // Update movements
       movement = returnMovements();
