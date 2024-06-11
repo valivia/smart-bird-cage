@@ -6,15 +6,13 @@
 #include "PIRMeasurement.h"
 #include "HX711.h"
 #include "Microphone.h"
+#include "WiFiCredentials.h"
 
 
-#define LDRpin 23 // Don't choose an ADC pin for the LDR
+#define LDRpin 35
+
 
 int device_id = 1;
-
-// // WiFi credentials
-const char* ssid = "AndroidAP";
-const char* password = "qwertyuiop";
 
 // // Server settings
 const char* serverName = "https://bird.hootsifer.com/api/v1/data";
@@ -32,6 +30,7 @@ int movement = 0;
 int light = 0;
 int lux = 0;
 
+
 // Loadcell
 HX711 scale;
 uint8_t dataPin = 19;
@@ -43,7 +42,7 @@ int sound = 0;
 
 void setup() {
   Serial.begin(115200);
-  
+  pinMode(LDRpin, INPUT);
   setupDHT22();
   setupPIR();
   setupMic();
@@ -110,9 +109,13 @@ void loop() {
       movement = returnMovements();
 
       // Measure Light value
-      // light = analogRead(LDRpin);
+      // int light = analogRead(LDRpin); // Read LDR value
+      // lux = light / 4.45; // calibrated to convert raw LDR value to lux with 10k Ohm resistor
+      // Serial.print("LDR Value: ");
+      // Serial.println(lux);
+
       lux = light / 4.45; // calibrated to convert raw ldr value to lux with 10k Ohm resistor
-      
+
 
       // Construct the JSON string
       String httpRequestData = "{\"device_id\": " + String(device_id) +
@@ -130,6 +133,7 @@ void loop() {
       Serial.println("HTTP Request Data:");
       Serial.println(httpRequestData);
       Serial.println(httpResponseCode);
+      Serial.println("_______________________________________________________");
       // Free resources
       http.end();
     } else {
