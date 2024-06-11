@@ -47,7 +47,7 @@ pub struct Datapoint {
 
 #[derive(Debug, FromRow, Clone)]
 pub struct DataPointAverage {
-    pub time: Option<chrono::NaiveDate>,
+    pub time: Option<chrono::DateTime<Utc>>,
     pub movement: Option<i32>,
     pub sound: Option<i32>,
     pub weight: Option<f64>,
@@ -60,10 +60,7 @@ pub struct DataPointAverage {
 impl From<DataPointAverage> for Datapoint {
     fn from(average: DataPointAverage) -> Self {
         Datapoint {
-            time: average
-                .time
-                .map(|t| t.and_hms_opt(0, 0, 0).unwrap().and_utc())
-                .unwrap(),
+            time: average.time.unwrap(),
             movement: average.movement.unwrap_or(0),
             sound: average.sound.unwrap_or(0),
             weight: average
