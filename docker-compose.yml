@@ -45,6 +45,7 @@ services:
   proxy:
     image: nginx:alpine
     container_name: birdcage-proxy
+    restart: always
     ports:
       - "82:80"
     volumes:
