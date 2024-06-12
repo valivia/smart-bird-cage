@@ -1,3 +1,3 @@
-void setupLoadcell();
+bool setupLoadcell();
 void runLoadcellLoop();
 int getLoadcellValue();

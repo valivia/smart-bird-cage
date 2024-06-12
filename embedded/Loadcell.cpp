@@ -3,27 +3,40 @@
 #define CLOCK_PIN 21
 
 // NOTE not done, unreliable method
-HX711 scale;
-float measuredWeight = -1.0;
-float weight = -1.0;
+HX711 loadcell;
+float weight = 0.0;
+bool is_loadcell_initialized = false;
 
-void setupLoadcell()
+bool setupLoadcell()
 {
-    scale.begin(DATA_PIN, CLOCK_PIN);
-    scale.calibrate_scale(1000, 5);
+  loadcell.begin(DATA_PIN, CLOCK_PIN);
+
+  // NOTE supposed to check if the loadcell is connected, doesnt work!?
+  if (loadcell.wait_ready_timeout(1000))
+  {
     Serial.println("Loadcell: Sensor initialized.");
+    loadcell.calibrate_scale(1000, 5);
+    is_loadcell_initialized = true;
+  }
+  else
+    Serial.println("Loadcell: Failed to initialize sensor.");
+
+  return is_loadcell_initialized;
 }
 
 void runLoadcellLoop()
 {
-    measuredWeight = scale.get_units(5);
-    if (measuredWeight > 10)
-    {
-        weight = measuredWeight;
-    }
+  if (!is_loadcell_initialized)
+    return;
+
+  float measuredWeight = loadcell.get_units(5);
+  if (measuredWeight > 10)
+  {
+    weight = measuredWeight;
+  }
 }
 
 float getLoadcellValue()
 {
-    return weight;
+  return weight;
 }

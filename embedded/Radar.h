@@ -2,7 +2,7 @@
 #define RADAR_MODULE_H
 
 // Function declarations
-void setupRadar(void);
+bool setupRadar(void);
 void runRadarLoop(void);
 int getRadarValue(void);
 

@@ -7,6 +7,8 @@
 #include "LDR.h"
 
 #define UPLOAD_INTERVAL 15 * 1000
+#define STATUS_LED 2
+
 unsigned long lastTime = 0;
 
 int sound = 0;
@@ -15,11 +17,23 @@ void setup()
 {
   Serial.begin(115200);
 
-  // Initialize the sensors
-  setupDHT22();
-  setupMicrophone();
-  setupRadar();
-  setupLoadcell();
+  pinMode(STATUS_LED, OUTPUT);
+
+  bool hasFailures = false;
+
+  // Initialize the sensors.
+  hasFailures |= !setupClimateSensor();
+  hasFailures |= !setupLoadcell();
+  hasFailures |= !setupRadar();
+  hasFailures |= !setupLDR();
+  setupMicrophone(); // NOTE idk how to use this one
+
+  // If any sensor failed to initialize, turn on the status LED
+  if (hasFailures)
+    digitalWrite(STATUS_LED, LOW);
+
+  // Initialize other
+  setupWiFi();
 }
 
 void loop()
@@ -27,7 +41,7 @@ void loop()
   // If enough time has passed, summarize and send data
   if ((millis() - lastTime) > UPLOAD_INTERVAL)
   {
-    SummarizeAndSendData();
+    SummarizeAndUploadData();
     lastTime = millis();
   }
   // Otherwise, poll the sensors
@@ -42,17 +56,17 @@ void pollSensors()
   runLoadcellLoop();
   runRadarLoop();
   runLDRLoop();
-  runMicrophoneLoop();
+  // runMicrophoneLoop();
 }
 
-void SummarizeAndSendData()
+void SummarizeAndUploadData()
 {
   float temperature = measureTemperature();
   float humidity = measureHumidity();
-  float weight = getWeight();
+  float weight = getLoadcellValue();
   int movement = getRadarValue();
   int light = getLDRValue();
-  int sound = getSound();
+  int sound = getMicrophoneValue();
 
   sendDataToServer(temperature, humidity, weight, movement, light, sound);
 }

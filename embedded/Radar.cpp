@@ -1,5 +1,4 @@
 #include <ld2410.h>
-
 #define RADAR_RX_PIN 27
 #define RADAR_TX_PIN 26
 #define RADAR_SERIAL Serial1
@@ -11,21 +10,28 @@ int radar_total_score = 0;
 int radar_measurement_count = 0;
 unsigned long radar_last_measurement = 0;
 
-void setupRadar(void)
+bool is_radar_initialized = false;
+
+bool setupRadar(void)
 {
   RADAR_SERIAL.begin(256000, SERIAL_8N1, RADAR_RX_PIN, RADAR_TX_PIN);
   if (radar.begin(RADAR_SERIAL))
   {
-    Serial.println("Radar connected.");
+    Serial.println("Radar: Sensor initialized.");
+    is_radar_initialized = true;
   }
   else
   {
-    Serial.println("Radar couldnt connect.");
+    Serial.println("Radar: Failed to initialize sensor.");
   }
+
+  return is_radar_initialized;
 }
 
 void runRadarLoop()
 {
+  if (!is_radar_initialized)
+    return;
 
   // Check if it is time to read the sensor
   if (millis() - radar_last_measurement < RADAR_POLLING_INTERVAL)
@@ -44,6 +50,9 @@ void runRadarLoop()
 
 int getRadarValue()
 {
+  if (radar_measurement_count == 0)
+    return 0;
+
   int average = radar_total_score / radar_measurement_count;
 
   // Serial.print("Radar: Score = ");

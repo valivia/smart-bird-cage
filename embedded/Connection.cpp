@@ -1,8 +1,9 @@
+#include <HTTPClient.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include "Credentials.h"
 
-void setupWifi()
+void setupWiFi()
 {
     WiFi.begin(ssid, password);
     Serial.println("wifi: Connecting...");
@@ -31,13 +32,6 @@ void sendDataToServer(float temperature, float humidity, float weight, int movem
     HTTPClient http;
 
     client.setInsecure();
-
-    // Check if we can connect to the server
-    if (!client.connect(serverName, 443))
-    {
-        Serial.println("Wifi: connection failed");
-        return;
-    }
 
     http.begin(client, serverName);
     http.addHeader("Content-Type", "application/json");

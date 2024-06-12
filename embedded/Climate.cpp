@@ -1,19 +1,33 @@
-#include "DHT22Measurement.h"
+#include "DHT.h"
 
-#define SENSOR_PIN 4
-#define SENSOR_TYPE DHT22
-#define MEASUREMENT_INTERVAL 10000
+#define DHT_DATA_PIN 4
+#define DHT_SENSOR_TYPE DHT22
 
-DHT dht(SENSOR_PIN, SENSOR_TYPE);
+DHT dht(DHT_DATA_PIN, DHT_SENSOR_TYPE);
 
-void setupClimateSensor()
+bool is_climate_sensor_initialized = false;
+
+bool setupClimateSensor()
 {
   dht.begin();
-  Serial.println("Climate: Sensor initialized.");
+  if (dht.read())
+  {
+    Serial.println("Climate: Sensor initialized.");
+    is_climate_sensor_initialized = true;
+  }
+  else
+  {
+    Serial.println("Climate: Failed to initialize sensor");
+  }
+
+  return is_climate_sensor_initialized;
 }
 
 float measureTemperature()
 {
+  if (!is_climate_sensor_initialized)
+    return 0;
+
   float temp = dht.readTemperature();
   if (isnan(temp))
   {
@@ -25,6 +39,9 @@ float measureTemperature()
 
 float measureHumidity()
 {
+  if (!is_climate_sensor_initialized)
+    return 0;
+
   float hum = dht.readHumidity();
   if (isnan(hum))
   {
