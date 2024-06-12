@@ -4,10 +4,7 @@ use serde::Deserialize;
 #[serde(rename_all = "lowercase")]
 pub struct Config {
     // Database.
-    pub db_host: String,
-    pub db_org: String,
-    pub db_token: String,
-    pub db_bucket: String,
+    pub database_url: String,
 
     // Module urls.
     pub origin: String,

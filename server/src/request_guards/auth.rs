@@ -1,9 +1,8 @@
 use rocket::http::Status;
 use rocket::request::{FromRequest, Outcome, Request};
 use rocket::State;
-use sled::Db;
 
-use crate::db::devices::get_device_info;
+use crate::db::Database;
 use crate::models::device::Device;
 
 #[derive(Debug)]
@@ -18,39 +17,29 @@ impl<'r> FromRequest<'r> for Device {
     type Error = AuthError;
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        let mut headers = req.headers().get("Authorization");
+        let token = match req.headers().get_one("Authorization") {
+            Some(token) => token,
+            None => return Outcome::Error((Status::Unauthorized, AuthError::Missing)),
+        };
 
-        // Extract and parse the ID
-        let id = headers
-            .next()
-            .and_then(|auth| auth.parse::<i64>().ok())
-            .ok_or(AuthError::Missing)
-            .and_then(|id| {
-                if id > 0 {
-                    Ok(id)
-                } else {
-                    Err(AuthError::Invalid)
-                }
-            });
+        let db = match req.guard::<&State<Database>>().await {
+            Outcome::Success(devices) => devices,
+            _ => return Outcome::Error((Status::InternalServerError, AuthError::Server)),
+        };
 
-        // Extract the token
-        let token = headers.next().ok_or(AuthError::Missing);
-
-        match (id, token) {
-            (Ok(id), Ok(token)) => {
-                let devices = match req.guard::<&State<Db>>().await {
-                    Outcome::Success(devices) => devices,
-                    _ => return Outcome::Error((Status::InternalServerError, AuthError::Server)),
-                };
-
-                match get_device_info(devices, id) {
-                    Some(device) if device.token == token => Outcome::Success(device),
-                    _ => Outcome::Error((Status::Unauthorized, AuthError::Invalid)),
-                }
-            }
-            (Err(AuthError::Missing), _) | (_, Err(AuthError::Missing)) => {
-                Outcome::Error((Status::Unauthorized, AuthError::Missing))
-            }
+        match sqlx::query_as!(
+            Device,
+            r#"
+                    SELECT *
+                    FROM device
+                    WHERE token = $1
+                    "#,
+            token
+        )
+        .fetch_one(&db.pool)
+        .await
+        {
+            Ok(device) => Outcome::Success(device),
             _ => Outcome::Error((Status::Unauthorized, AuthError::Invalid)),
         }
     }
