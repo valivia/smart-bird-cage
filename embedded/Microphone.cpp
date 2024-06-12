@@ -9,8 +9,7 @@
 #define I2S_MIC_LEFT_RIGHT_CLOCK GPIO_NUM_25
 #define I2S_MIC_SERIAL_DATA GPIO_NUM_22
 
-bool chirps = false;
-int maxAmplitude = -1;
+int chirps = 0;
 
 // I2S configuration
 i2s_config_t i2s_config = {
@@ -24,15 +23,13 @@ i2s_config_t i2s_config = {
     .dma_buf_len = 1024,
     .use_apll = false,
     .tx_desc_auto_clear = false,
-    .fixed_mclk = 0
-};
+    .fixed_mclk = 0};
 
 i2s_pin_config_t i2s_mic_pins = {
     .bck_io_num = I2S_MIC_SERIAL_CLOCK,
     .ws_io_num = I2S_MIC_LEFT_RIGHT_CLOCK,
     .data_out_num = I2S_PIN_NO_CHANGE,
-    .data_in_num = I2S_MIC_SERIAL_DATA
-};
+    .data_in_num = I2S_MIC_SERIAL_DATA};
 
 // FFT settings
 double vReal[SAMPLE_BUFFER_SIZE];
@@ -44,21 +41,20 @@ ArduinoFFT<double> FFT = ArduinoFFT<double>(vReal, vImag, SAMPLE_BUFFER_SIZE, SA
 #define SCL_FREQUENCY 0x02
 #define SCL_PLOT 0x03
 
-void setupMic()
+void setupMicrophone()
 {
   // I2S setup
   i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
   i2s_set_pin(I2S_NUM_0, &i2s_mic_pins);
-  Serial.println("Ready");
+  Serial.println("Microphone: Sensor initialized.");
 }
 
 int32_t raw_samples[SAMPLE_BUFFER_SIZE];
 
-bool listen()
+void runMicrophoneLoop()
 {
-  chirps = false;
-  maxAmplitude = 0;
-  
+  int max_amplitude = 0;
+
   // Read from the I2S device
   size_t bytes_read = 0;
   i2s_read(I2S_NUM_0, raw_samples, sizeof(int32_t) * SAMPLE_BUFFER_SIZE, &bytes_read, portMAX_DELAY);
@@ -68,10 +64,10 @@ bool listen()
   for (int i = 0; i < samples_read; i++)
   {
     vReal[i] = raw_samples[i] / 2147483648.0; // Normalize 32-bit signed int to double in range [-1.0, 1.0]
-    vImag[i] = 0.0; // Imaginary part is zero for real input
-    if (abs(raw_samples[i]) > maxAmplitude)
+    vImag[i] = 0.0;                           // Imaginary part is zero for real input
+    if (abs(raw_samples[i]) > max_amplitude)
     {
-      maxAmplitude = abs(raw_samples[i]);
+      max_amplitude = abs(raw_samples[i]);
     }
   }
 
@@ -80,16 +76,17 @@ bool listen()
   FFT.compute(FFT_FORWARD);
   FFT.complexToMagnitude();
 
-  double peakFrequency = FFT.majorPeak();
+  double peak_frequency = FFT.majorPeak();
 
-
-  if (maxAmplitude > 1000000 && peakFrequency >= 3000 && peakFrequency <= 7000)
+  if (max_amplitude > 1000000 && peak_frequency >= 3000 && peak_frequency <= 7000)
   {
-    chirps = true;
+    chirps++
   }
-  return chirps;
-  
 }
 
-
-
+int getMicrophoneValue()
+{
+  int result = chirps;
+  chirps = 0;
+  return result;
+}

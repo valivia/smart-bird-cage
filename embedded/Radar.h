@@ -4,6 +4,6 @@
 // Function declarations
 void setupRadar(void);
 void runRadarLoop(void);
-int getRadarScore(void);
+int getRadarValue(void);
 
 #endif // RADAR_MODULE_H
