@@ -5,6 +5,12 @@
 // NOTE not done, unreliable method
 static HX711 loadcell;
 static float weight = 0.0;
+static float weight_measure_1 = 0.0;
+static float weight_measure_2 = 0.0;
+static float weight_measure_3 = 0.0;
+static float weight_measure_4 = 0.0;
+static float weight_measure_5 = 0.0;
+static float avg_weight_measure = 0.0;
 static bool is_loadcell_initialized = false;
 
 bool setupLoadcell()
@@ -22,10 +28,15 @@ void runLoadcellLoop()
   if (!is_loadcell_initialized)
     return;
 
-  float measuredWeight = loadcell.get_units(5);
-  if (measuredWeight > 10)
-  {
-    weight = measuredWeight;
+  weight_measure_1 = weight_measure_2;
+  weight_measure_2 = weight_measure_3;
+  weight_measure_3 = weight_measure_4;
+  weight_measure_4 = weight_measure_5;
+  weight_measure_5 = loadcell.get_units(5);
+  avg_weight_measure = (weight_measure_1 + weight_measure_2 + weight_measure_3 + weight_measure_4 + weight_measure_5) / 5;
+
+  if ((avg_weight_measure / weight_measure_5) > 0.9 && (avg_weight_measure / weight_measure_5) < 1.1){
+    weight = avg_weight_measure;
   }
 }
 
