@@ -56,7 +56,7 @@ void pollSensors()
   runLoadcellLoop();
   runRadarLoop();
   runLDRLoop();
-  // runMicrophoneLoop();
+  runMicrophoneLoop();
 }
 
 void SummarizeAndUploadData()

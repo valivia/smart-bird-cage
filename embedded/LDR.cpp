@@ -22,7 +22,7 @@ void runLDRLoop()
     if (millis() - last_LDR_measurement < LDR_POLLING_INTERVAL)
         return;
 
-    int voltage = analogRead(LDR_PIN);
+    int voltage = 0; // analogRead(LDR_PIN);
     // NOTE, is this actually accurate?
     int lux = voltage * LDR_CALIBRATION_FACTOR;
     LDR_sum_lux += lux;
