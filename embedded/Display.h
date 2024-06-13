@@ -1,3 +1,2 @@
-void setupDisplay();
-void displayStats();
-void displayValues();
+bool setupDisplay();
+void displayValues(int weight);

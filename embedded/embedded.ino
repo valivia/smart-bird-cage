@@ -1,52 +1,60 @@
 #include <Arduino.h>
+
+// Sensors
 #include "Climate.h"
 #include "Microphone.h"
 #include "Radar.h"
 #include "Loadcell.h"
+
+// Other
 #include "Connection.h"
-#include "LDR.h"
+#include "Display.h"
 
+// Configuration
 #define UPLOAD_INTERVAL 15 * 1000
-#define STATUS_LED 2
+#define STATUS_LED_PIN 2
 
+// State
 unsigned long lastTime = 0;
-
-int sound = 0;
 
 void setup()
 {
   Serial.begin(115200);
+  Serial.println("Initializing...");
 
-  pinMode(STATUS_LED, OUTPUT);
-
+  pinMode(STATUS_LED_PIN, OUTPUT);
   bool hasFailures = false;
 
   // Initialize the sensors.
   hasFailures |= !setupClimateSensor();
   hasFailures |= !setupLoadcell();
   hasFailures |= !setupRadar();
-  hasFailures |= !setupLDR();
-  setupMicrophone(); // NOTE idk how to use this one
+  // NOTE, light
+  hasFailures |= !setupMicrophone();
 
   // If any sensor failed to initialize, turn on the status LED
   if (hasFailures)
-    digitalWrite(STATUS_LED, LOW);
+  {
+    digitalWrite(STATUS_LED_PIN, HIGH);
+    Serial.println("One or more sensors failed to initialize.");
+  }
 
   // Initialize other
   setupWiFi();
+  setupDisplay();
 }
 
 void loop()
 {
-  // If enough time has passed, summarize and send data
   if ((millis() - lastTime) > UPLOAD_INTERVAL)
   {
+    // If enough time has passed, summarize and send data
     SummarizeAndUploadData();
     lastTime = millis();
   }
-  // Otherwise, poll the sensors
   else
   {
+    // Otherwise, poll the sensors
     pollSensors();
   }
 }
@@ -55,8 +63,8 @@ void pollSensors()
 {
   runLoadcellLoop();
   runRadarLoop();
-  runLDRLoop();
   runMicrophoneLoop();
+  // NOTE, light
 }
 
 void SummarizeAndUploadData()
@@ -65,8 +73,9 @@ void SummarizeAndUploadData()
   float humidity = measureHumidity();
   float weight = getLoadcellValue();
   int movement = getRadarValue();
-  int light = getLDRValue();
+  int light = 0; // NOTE, light
   int sound = getMicrophoneValue();
 
   sendDataToServer(temperature, humidity, weight, movement, light, sound);
+  displayValues(weight);
 }
