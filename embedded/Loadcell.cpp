@@ -5,6 +5,7 @@
 // NOTE not done, unreliable method
 static HX711 loadcell;
 static float weight = 0.0;
+static float max_weight = 0.0;
 static float weight_measure_1 = 0.0;
 static float weight_measure_2 = 0.0;
 static float weight_measure_3 = 0.0;
@@ -38,9 +39,15 @@ void runLoadcellLoop()
   if ((avg_weight_measure / weight_measure_5) > 0.9 && (avg_weight_measure / weight_measure_5) < 1.1){
     weight = avg_weight_measure;
   }
+
+  if (weight > max_weight){
+    max_weight = weight;
+  }
 }
 
 float getLoadcellValue()
 {
-  return weight;
+  float temp_max_weight = max_weight;
+  max_weight = 0.0; // Reset max_weight to 0 after returning the value
+  return temp_max_weight;
 }
