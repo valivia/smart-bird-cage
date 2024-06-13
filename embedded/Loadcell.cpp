@@ -17,8 +17,10 @@ static bool is_loadcell_initialized = false;
 bool setupLoadcell()
 {
   loadcell.begin(DATA_PIN, CLOCK_PIN);
+  // Calibrated using "HX_Calibration" from "HX711.h" library
+  loadcell.set_offset(55637);
+  loadcell.set_scale(477.479980);
   Serial.println("Loadcell: Sensor initialized.");
-  loadcell.calibrate_scale(1000, 5);
   is_loadcell_initialized = true;
 
   return is_loadcell_initialized;
