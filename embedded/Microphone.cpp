@@ -78,6 +78,7 @@ void runMicrophoneLoop()
 
   double peak_frequency = FFT.majorPeak();
 
+  // Frequency calibrated with cockatiel noises
   if (max_amplitude > 1000000 && peak_frequency >= 3000 && peak_frequency <= 7000)
   {
     chirps++;
