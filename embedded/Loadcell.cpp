@@ -1,7 +1,7 @@
 #include "HX711.h"
 #define DATA_PIN 19
 #define CLOCK_PIN 18
-
+// Needs 5V
 #define LOADCELL_POLLING_INTERVAL 1000
 
 // NOTE not done, unreliable method
