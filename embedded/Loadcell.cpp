@@ -1,6 +1,6 @@
 #include "HX711.h"
 #define DATA_PIN 19
-#define CLOCK_PIN 21
+#define CLOCK_PIN 18
 
 // NOTE not done, unreliable method
 static HX711 loadcell;

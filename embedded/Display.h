@@ -1,2 +1,2 @@
 bool setupDisplay();
-void displayValues(int weight);
+void displayValues(float weight);

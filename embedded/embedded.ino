@@ -5,6 +5,7 @@
 #include "Microphone.h"
 #include "Radar.h"
 #include "Loadcell.h"
+#include "Light.h"
 
 // Other
 #include "Connection.h"
@@ -17,8 +18,7 @@
 // State
 unsigned long lastTime = 0;
 
-void setup()
-{
+void setup() {
   Serial.begin(115200);
   Serial.println("Initializing...");
 
@@ -29,12 +29,11 @@ void setup()
   hasFailures |= !setupClimateSensor();
   hasFailures |= !setupLoadcell();
   hasFailures |= !setupRadar();
-  // NOTE, light
+  hasFailures |= !setupLight();
   hasFailures |= !setupMicrophone();
 
   // If any sensor failed to initialize, turn on the status LED
-  if (hasFailures)
-  {
+  if (hasFailures) {
     digitalWrite(STATUS_LED_PIN, HIGH);
     Serial.println("One or more sensors failed to initialize.");
   }
@@ -44,36 +43,30 @@ void setup()
   setupDisplay();
 }
 
-void loop()
-{
-  if ((millis() - lastTime) > UPLOAD_INTERVAL)
-  {
+void loop() {
+  if ((millis() - lastTime) > UPLOAD_INTERVAL) {
     // If enough time has passed, summarize and send data
     SummarizeAndUploadData();
     lastTime = millis();
-  }
-  else
-  {
+  } else {
     // Otherwise, poll the sensors
     pollSensors();
   }
 }
 
-void pollSensors()
-{
+void pollSensors() {
   runLoadcellLoop();
   runRadarLoop();
   runMicrophoneLoop();
-  // NOTE, light
+  runLightLoop();
 }
 
-void SummarizeAndUploadData()
-{
+void SummarizeAndUploadData() {
   float temperature = measureTemperature();
   float humidity = measureHumidity();
   float weight = getLoadcellValue();
   int movement = getRadarValue();
-  int light = 0; // NOTE, light
+  int light = getLightvalue();
   int sound = getMicrophoneValue();
 
   sendDataToServer(temperature, humidity, weight, movement, light, sound);
