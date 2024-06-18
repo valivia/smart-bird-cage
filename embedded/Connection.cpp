@@ -37,11 +37,16 @@ void sendDataToServer(float temperature, float humidity, float weight, int movem
     http.addHeader("Content-Type", "application/json");
     http.addHeader("Authorization", token);
 
+    String weightString = String(weight);
+    if (weight < 40 || weight > 200) {
+        weightString = "undefined";
+    }
+
     // Construct the JSON string
     String httpRequestData = "{\"device_id\": " + String(device_id) +
                              ",\"temperature\": " + String(temperature) +
                              ",\"humidity\": " + String(humidity) +
-                             ",\"weight\": " + String(weight) +
+                             ",\"weight\": " + weightString +
                              ",\"movement\": " + String(movement) +
                              ",\"light\": " + String(light) +
                              ",\"sound\": " + String(sound) + "}";
