@@ -2,6 +2,8 @@
 #define DATA_PIN 19
 #define CLOCK_PIN 18
 
+#define LOADCELL_POLLING_INTERVAL 1000
+
 // NOTE not done, unreliable method
 static HX711 loadcell;
 static float weight = 0.0;
@@ -13,6 +15,7 @@ static float weight_measure_4 = 0.0;
 static float weight_measure_5 = 0.0;
 static float avg_weight_measure = 0.0;
 static bool is_loadcell_initialized = false;
+static unsigned long loadcell_last_measurement = 0;
 
 bool setupLoadcell()
 {
@@ -29,6 +32,10 @@ bool setupLoadcell()
 void runLoadcellLoop()
 {
   if (!is_loadcell_initialized)
+    return;
+
+  
+  if (!loadcell.is_ready() || millis() - loadcell_last_measurement < LOADCELL_POLLING_INTERVAL)
     return;
 
   weight_measure_1 = weight_measure_2;

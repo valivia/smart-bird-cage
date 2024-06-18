@@ -39,7 +39,7 @@ void sendDataToServer(float temperature, float humidity, float weight, int movem
 
     String weightString = String(weight);
     if (weight < 40 || weight > 200) {
-        weightString = "undefined";
+        weightString = "null";
     }
 
     // Construct the JSON string

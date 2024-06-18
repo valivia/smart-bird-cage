@@ -13,7 +13,7 @@ bool setupLight() {
   Wire.begin(DISPLAY_DATA_PIN, DISPLAY_CLOCK_PIN);
   lightMeter.begin();
 
-  Serial.println(F("BH1750 Test begin"));
+  Serial.println("BH1750 initialized");
   is_light_initialized = true;
 
   return is_light_initialized;
@@ -22,7 +22,6 @@ bool setupLight() {
 void runLightLoop() {
   if (!is_light_initialized)
     return;
-
   lux = lightMeter.readLightLevel();
 }
 

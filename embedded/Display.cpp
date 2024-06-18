@@ -42,7 +42,11 @@ void displayValues(float weight) {
 
   display.clearDisplay();
   display.setCursor(0, (DISPLAY_SCREEN_HEIGHT / 2));
-  display.print("Weight:");
-  display.println(weight);
+  if (weight == 0){
+    display.println("No bird :(");
+  } else {
+    display.print("Weight:");
+    display.println(weight);
+  }
   display.display();
 }
