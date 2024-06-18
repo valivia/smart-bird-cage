@@ -14,8 +14,6 @@
         data = await fetchData(API_URLS.DAY);
         // data = data.slice(-288)
 
-        console.log(data)
-
         const interval = setInterval(async () => {
             const lastValue = await fetchData(API_URLS.LAST);
             data = [...data.slice(1), lastValue]
@@ -73,10 +71,10 @@
 
     <div class="flex items-center justify-between pt-5">
         <Button class="inline-flex items-center py-0 text-sm font-medium text-center text-gray-500 bg-transparent dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent focus:ring-transparent dark:focus:ring-transparent">{timePeriod}<ChevronDownOutline class="w-2.5 m-2.5 ms-1.5" /></Button>
-        <Dropdown class="w-40" offset={-6} bind:open={dropdownOpen}>
-        {#each timePeriodOptionsValues as option, i}
-            <DropdownItem on:click={setTimePeriod}>{option}</DropdownItem>
-        {/each}
+        <Dropdown classContainer='dark:bg-[#374151] dark:text-white overflow-hidden' class="w-40" offset={-6} bind:open={dropdownOpen}>
+            {#each timePeriodOptionsValues as option, i}
+                <DropdownItem defaultClass="dark:hover:bg-[#4b5563] w-full text-left px-2 first:pt-1 last:pb-1" on:click={setTimePeriod}>{option}</DropdownItem>
+            {/each}
         </Dropdown>
     </div>
 </main>

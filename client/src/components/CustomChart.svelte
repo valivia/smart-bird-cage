@@ -15,7 +15,7 @@
     export let stepSize: number | undefined = undefined;
     export let color: string;
     
-    export let data: number[];
+    export let data: number[] = [];
     export let timeStamps: string[];
     export let timePeriod: string = "Last 24H";
     
@@ -126,7 +126,8 @@
         show: true,
         min,
         max,
-        stepSize
+        stepSize,
+        decimalsInFloat: 1,
       }
     };
 
