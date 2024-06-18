@@ -5,12 +5,12 @@
 
 #define RADAR_POLLING_INTERVAL 1000
 
-ld2410 radar;
-int radar_total_score = 0;
-int radar_measurement_count = 0;
-unsigned long radar_last_measurement = 0;
+static ld2410 radar;
+static int radar_total_score = 0;
+static int radar_measurement_count = 0;
+static unsigned long radar_last_measurement = 0;
 
-bool is_radar_initialized = false;
+static bool is_radar_initialized = false;
 
 bool setupRadar(void)
 {
@@ -54,13 +54,6 @@ int getRadarValue()
     return 0;
 
   int average = radar_total_score / radar_measurement_count;
-
-  // Serial.print("Radar: Score = ");
-  // Serial.print(average);
-  // Serial.print(" Sum = ");
-  // Serial.print(radar_total_score);
-  // Serial.print(" Counter = ");
-  // Serial.println(radar_measurement_count);
 
   radar_total_score = 0;
   radar_measurement_count = 0;
