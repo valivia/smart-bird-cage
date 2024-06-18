@@ -3,8 +3,9 @@
     import Card from './Card.svelte';
     import { API_URLS } from '$lib/api';
     import { fetchData } from '$lib/fetch';
-    import type { SensorData } from '$lib/interfaces/sensorData';
+    import type { sensorData } from '$lib/interfaces/sensorData';
     import { onMount } from 'svelte';
+    import type { columnData } from '$lib/interfaces/columnData';
     
     export let name: 'Humidity' | 'Temperature' | 'Light' | 'Weight' | 'Movement' | 'Sound';
     export let description: string | undefined = undefined;
@@ -18,12 +19,12 @@
     export let timeStamps: string[];
     export let timePeriod: string = "Last 24H";
     
-    let weekData: SensorData[];
-    let weekDataValues: object;
-    let monthData: SensorData[];
-    let monthDataValues: object;
-    let yearData: SensorData[];
-    let yearDataValues: object;
+    let weekData: sensorData[];
+    let weekDataValues: columnData[];
+    let monthData: sensorData[];
+    let monthDataValues: columnData[];
+    let yearData: sensorData[];
+    let yearDataValues: columnData[];
 
     onMount(() => {
       const fetchPeriods = async () => {
@@ -38,13 +39,13 @@
       fetchPeriods()
     })
 
-    const mapData = (data: SensorData[], group: string) => {
-        let groupBy: Intl.DateTimeFormatOptions = group === 'day' ? { weekday: 'long' } : group === 'month' ? { month: 'long' } : group === 'date' && {day: 'numeric',month: 'short'}
+    const mapData = (data: sensorData[], group: string) => {
+        let groupBy: Intl.DateTimeFormatOptions = group === 'day' ? { weekday: 'long' } : group === 'month' ? { month: 'long' } : group === 'date' ? {day: 'numeric',month: 'short'} : {}
 
-        return data.map(item => ({x: new Date(item.time).toLocaleString('default', groupBy), y: item[(name.toLowerCase()) as keyof SensorData]}));
+        return data.map(item => ({x: new Date(item.time).toLocaleString('default', groupBy), y: item[(name.toLowerCase()) as keyof sensorData]}));
     };
 
-    let timePeriodData: [];
+    let timePeriodData: columnData[];
 
     let overwriteData = () => {
       switch(timePeriod) {
@@ -133,14 +134,14 @@
       ...commonOptions,
       chart: {
         ...commonOptions.chart,
-        type: "line",
+        type: "line" as const,
         dropShadow: {
           enabled: false
         }
       },
       stroke: {
         width: 5,
-        curve: 'smooth'
+        curve: 'smooth' as const
       },
       
     };
@@ -149,13 +150,13 @@
       ...commonOptions,
       chart: {
         ...commonOptions.chart,
-        type: "bar"
+        type: "bar" as const
       },
       plotOptions: {
         bar: {
           horizontal: false,
           columnWidth: '70%',
-          borderRadiusApplication: 'end',
+          borderRadiusApplication: 'end' as const,
           borderRadius: 8
         }
       },

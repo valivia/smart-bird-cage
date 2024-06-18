@@ -3,16 +3,16 @@
     import { fetchData } from "$lib/fetch";
     import { onMount } from "svelte";
     import { API_URLS } from "$lib/api";
-    import type { SensorData } from "$lib/interfaces/sensorData";
+    import type { sensorData } from "$lib/interfaces/sensorData";
     import { Button, Dropdown, DropdownItem } from "flowbite-svelte";
     import { ChevronDownOutline } from "flowbite-svelte-icons";
 
     const fetchIntervalSeconds = 300;
-    let data: SensorData[];
+    let data: sensorData[];
 
     const fetchPeriods = async () => {
         data = await fetchData(API_URLS.DAY);
-        data = data.slice(-288)
+        // data = data.slice(-288)
 
         console.log(data)
 
@@ -57,7 +57,8 @@
 
     const setTimePeriod = (e: Event) => {
         e.preventDefault();
-        timePeriod = e.target.innerHTML;
+        let event = e.target as HTMLElement
+        timePeriod = event?.innerHTML;
         dropdownOpen = false;
     };
 </script>

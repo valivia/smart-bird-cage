@@ -1,4 +1,4 @@
-export interface SensorData {
+export interface sensorData {
     humidity: number;
     temperature: number;
     light: number;
