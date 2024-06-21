@@ -2,9 +2,9 @@
   import { Card, Button, Dropdown, DropdownItem, Popover } from 'flowbite-svelte';
   import { InfoCircleSolid, ChevronDownOutline} from 'flowbite-svelte-icons';
 
-  export let name;
-  export let description;
-  export let timePeriod: string = 'Last 24H'
+  export let name: string;
+  export let description: string;
+  export let timePeriod: string;
   
   let dropdownOpen = false;
   const timePeriodOptions: object = {'Last 24H': 'day', 'Last week': 'week', 'Last month': 'month', 'Last year': 'year'}
@@ -18,8 +18,8 @@
   };
 </script>
 
-<Card class="flex-col p-5">
-    <h5 class="inline-flex items-center mb-10 text-3xl font-bold leading-none text-gray-900 dark:text-white">
+<Card class="flex-col p-5 aspect-video">
+    <h2 class="inline-flex items-center mb-10 text-3xl font-bold leading-none text-gray-900 dark:text-white">
       {name}
       {#if description}
       <InfoCircleSolid id="b1" class="w-3 h-3 text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-white ms-1" />
@@ -29,7 +29,7 @@
           <p>{description}</p>
       </Popover>
       {/if}
-    </h5>
+    </h2>
     <slot />
     <div class="grid items-center justify-between grid-cols-1 border-t border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between pt-5">

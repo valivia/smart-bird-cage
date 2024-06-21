@@ -9,7 +9,7 @@
     
     export let name: 'Humidity' | 'Temperature' | 'Light' | 'Weight' | 'Movement' | 'Sound';
     export let description: string | undefined = undefined;
-    export let unit: '%' | '°C' | 'LUX' | 'g' | undefined = undefined;
+    export let unit: '%' | '°C' | 'LUX' | 'g' | 'amount' | undefined = undefined;
     export let min: number | undefined = undefined;
     export let max: number | undefined = undefined;
     export let stepSize: number | undefined = undefined;
@@ -17,7 +17,7 @@
     
     export let data: number[] = [];
     export let timeStamps: string[];
-    export let timePeriod: string = "Last 24H";
+    export let timePeriod: string;
     
     let weekData: sensorData[];
     let weekDataValues: columnData[];
@@ -45,7 +45,7 @@
         return data.map(item => ({x: new Date(item.time).toLocaleString('default', groupBy), y: item[(name.toLowerCase()) as keyof sensorData]}));
     };
 
-    let timePeriodData: columnData[];
+    let timePeriodData: columnData[] = [];
 
     let overwriteData = () => {
       switch(timePeriod) {
@@ -62,20 +62,28 @@
           timePeriodData = yearDataValues
           break
       }
+      console.log(timePeriodData)
     }
 
-    $: timePeriod && overwriteData()
+    $: timePeriod && yearDataValues && overwriteData()
 
     $: commonOptions = {
       chart: {
-        height: '400px',
-        width: '100%',
+        width: "100%",
+        height: '80%',
         fontFamily: 'Inter, sans-serif',
         foreColor: 'currentColor',
         toolbar: {
           show: false
+        },
+        animations: {
+          enabled: true
         }
       },
+      responsive: [{
+          breakpoint: 390,
+          options: {},
+      }],
       series: [
         {
           name: `${name} (${unit})`,
@@ -106,7 +114,7 @@
       },
       xaxis: {
         tickAmount: 10,
-        categories: timePeriod === "Last 24H" && timeStamps,
+        categories: timePeriod === "Last 24H" ? timeStamps: [],
         labels: {
           trim: true,
           show: true,
