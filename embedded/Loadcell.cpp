@@ -1,7 +1,15 @@
 #include "HX711.h"
+
+// ## Esp side:
+// vcc = 5V
+// ## Loadcell side wiring:
+// red (vcc) = e+
+// black (gnd) = e-
+// white (output-) = a-
+// green (output+) = a+
+
 #define DATA_PIN 19
 #define CLOCK_PIN 18
-// Needs 5V
 #define LOADCELL_POLLING_INTERVAL 1000
 
 // NOTE not done, unreliable method
@@ -34,7 +42,6 @@ void runLoadcellLoop()
   if (!is_loadcell_initialized)
     return;
 
-  
   if (!loadcell.is_ready() || millis() - loadcell_last_measurement < LOADCELL_POLLING_INTERVAL)
     return;
 
