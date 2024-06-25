@@ -35,6 +35,8 @@ services:
     container_name: birdcage-client
     build: client
     restart: always
+    env_file:
+      - ./client/.env
     environment:
       # NOTE
       - ORIGIN=https://bird.hootsifer.com
