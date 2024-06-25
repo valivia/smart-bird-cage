@@ -2,7 +2,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <Fonts/FreeSans9pt7b.h>
-
+// Needs 3.3V
 #define DISPLAY_SCREEN_WIDTH 128
 #define DISPLAY_SCREEN_HEIGHT 64
 #define DISPLAY_ADDRESS 0x3C

@@ -1,4 +1,6 @@
 #include "DHT.h"
+// From left to right: Power, Data pin with 10k Ohm resitor and 3.3V, Ground
+// Needs 3.3V
 
 #define DHT_DATA_PIN 4
 #define DHT_SENSOR_TYPE DHT22

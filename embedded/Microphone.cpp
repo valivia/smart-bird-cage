@@ -2,12 +2,13 @@
 #include "arduinoFFT.h"
 
 // Configuration
+// Needs 3.3V
 #define SAMPLE_BUFFER_SIZE 512
 #define SAMPLE_RATE 44100
 #define I2S_MIC_CHANNEL I2S_CHANNEL_FMT_ONLY_LEFT
-#define I2S_MIC_SERIAL_CLOCK GPIO_NUM_12
-#define I2S_MIC_LEFT_RIGHT_CLOCK GPIO_NUM_14
-#define I2S_MIC_SERIAL_DATA GPIO_NUM_13
+#define I2S_MIC_SERIAL_CLOCK GPIO_NUM_12      // SCK
+#define I2S_MIC_LEFT_RIGHT_CLOCK GPIO_NUM_14  // WS
+#define I2S_MIC_SERIAL_DATA GPIO_NUM_13       // SD
 
 static int chirps = 0;
 static bool is_microphone_initialized = false;

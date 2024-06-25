@@ -1,4 +1,5 @@
 #include <ld2410.h>
+// Needs 5V
 #define RADAR_RX_PIN 17
 #define RADAR_TX_PIN 16
 #define RADAR_SERIAL Serial2
@@ -36,24 +37,24 @@ void runRadarLoop() {
 
   radar_last_measurement = millis();
 
-  // if (radar.presenceDetected()) {
-  //   // if (radar.stationaryTargetDetected()) {
-  //   //   Serial.print(F("Stationary target: "));
-  //   //   Serial.print(radar.stationaryTargetDistance());
-  //   //   Serial.print(F("cm energy:"));
-  //   //   Serial.print(radar.stationaryTargetEnergy());
-  //   //   Serial.print(' ');
-  //   // }
-  //   if (radar.movingTargetDetected()) {
-  //     Serial.print(F("Moving target: "));
-  //     Serial.print(radar.movingTargetDistance());
-  //     Serial.print(F("cm energy:"));
-  //     Serial.println(radar.movingTargetEnergy());
-  //   }
-  // //   Serial.println();
-  // } else {
-  //   Serial.println(F("No target"));
-  // }
+  if (radar.presenceDetected()) {
+    if (radar.stationaryTargetDetected()) {
+      Serial.print(F("Stationary target: "));
+      Serial.print(radar.stationaryTargetDistance());
+      Serial.print(F("cm energy:"));
+      Serial.print(radar.stationaryTargetEnergy());
+      Serial.print(' ');
+    }
+    if (radar.movingTargetDetected()) {
+      Serial.print(F("Moving target: "));
+      Serial.print(radar.movingTargetDistance());
+      Serial.print(F("cm energy:"));
+      Serial.print(radar.movingTargetEnergy());
+    }
+    Serial.println();
+  } else {
+    Serial.println(F("No target"));
+  }
 
 
   int radar_score = radar.movingTargetEnergy();
@@ -61,7 +62,6 @@ void runRadarLoop() {
     radar_total_score = radar_total_score + radar_score;
   }
 
-  Serial.println(radar_total_score);
 
   radar_measurement_count++;
 }

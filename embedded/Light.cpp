@@ -1,7 +1,7 @@
 #include <BH1750.h>
 #include <Wire.h>
 
-
+// Needs 3.3V
 #define DISPLAY_DATA_PIN 22
 #define DISPLAY_CLOCK_PIN 21
 
