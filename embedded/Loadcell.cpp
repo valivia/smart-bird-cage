@@ -58,11 +58,9 @@ void runLoadcellLoop() {
     Serial.print(" (offset: ");
     Serial.print(weight_offset);
     Serial.println("g)");
+    weight = measure - weight_offset;
+    setWeight(weight);
   }
-
-  weight = measure - weight_offset;
-
-  setWeight(weight);
 }
 
 float getLoadcellValue() {

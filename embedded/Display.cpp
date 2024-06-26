@@ -10,15 +10,17 @@
 #define DISPLAY_DATA_PIN 22
 #define DISPLAY_CLOCK_PIN 21
 
+#define DISPLAY_UPDATE_TIMEOUT 5000
+
 Adafruit_SSD1306 display(DISPLAY_SCREEN_WIDTH, DISPLAY_SCREEN_HEIGHT, &Wire, -1);
 
 static bool is_display_initialized = false;
 
-float display_weight = -1.0;
+float display_weight = 0.0;
 int display_light = -1.0;
 float display_temperature = -1.0;
-bool updating = false;
-bool has_changed = false;
+bool display_connection_updating = false;
+unsigned long display_last_update = 0;
 
 bool setupDisplay() {
   Wire.begin(DISPLAY_DATA_PIN, DISPLAY_CLOCK_PIN);
@@ -40,8 +42,15 @@ bool setupDisplay() {
 }
 
 void runDisplayLoop() {
-  if (!has_changed)
+  if (millis() - display_last_update > DISPLAY_UPDATE_TIMEOUT)
     return;
+
+  // Turn off the display if the light is too low to protect the birds sleep
+  if (display_light < 20) {
+    display.clearDisplay();
+    display.display();
+    return;
+  }
 
   display.clearDisplay();
   display.setCursor(0, 6);
@@ -53,31 +62,42 @@ void runDisplayLoop() {
   display.setCursor(0, 26);
   display.println("Temperature: " + String(display_temperature) + "C");
 
-  if (updating) {
+  if (display_connection_updating) {
     display.setCursor(0, 36);
     display.println("Updating...");
   }
 
   display.display();
-  has_changed = false;
 }
 
 void setWeight(float weight) {
-  has_changed = weight != display_weight;
+  if (weight == display_weight)
+    return;
+
+  display_last_update = millis();
   display_weight = weight;
 }
 
 void setLight(int light) {
-  has_changed = light != display_light;
+  if (light == display_light)
+    return;
+
+  display_last_update = millis();
   display_light = light;
 }
 
 void setTemperature(float temperature) {
-  has_changed = temperature != display_temperature;
+  if (temperature == display_temperature)
+    return;
+
+  display_last_update = millis();
   display_temperature = temperature;
 }
 
 void setUpdating(bool state) {
-  updating = state;
-  has_changed = true;
+  if (state == display_connection_updating)
+    return;
+
+  display_last_update = millis();
+  display_connection_updating = state;
 }
