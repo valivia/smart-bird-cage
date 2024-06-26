@@ -12,7 +12,7 @@
 #include "Display.h"
 
 // Configuration
-#define UPLOAD_INTERVAL 15 * 1000
+#define UPLOAD_INTERVAL 5 * 60 * 1000
 #define STATUS_LED_PIN 2
 
 struct Sensor {
@@ -115,6 +115,9 @@ void SummarizeAndUploadData() {
   // Print the total execution time
   Serial.print("Total execution time: ");
   Serial.print(total_execution_time);
-  Serial.println("ms");
+  Serial.print("ms (");
+  float percentage = (static_cast<float>(total_execution_time) * 100.0) / static_cast<float>(UPLOAD_INTERVAL);
+  Serial.print(percentage, 2);
+  Serial.println("% of the main loop)");
   Serial.println("==================================");
 }

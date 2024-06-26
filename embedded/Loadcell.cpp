@@ -13,9 +13,13 @@
 #define CLOCK_PIN 18
 #define LOADCELL_POLLING_INTERVAL 1000
 
+#define MAX_WEIGHT 200.0
+#define MIN_WEIGHT 40.0
+
 // NOTE not done, unreliable method
 static HX711 loadcell;
 static float weight = 0.0;
+static float weight_offset = 0.0;
 
 static bool is_loadcell_initialized = false;
 static unsigned long loadcell_last_measurement = 0;
@@ -32,24 +36,33 @@ bool setupLoadcell() {
 }
 
 void runLoadcellLoop() {
-  if (!loadcell.is_ready() || millis() - loadcell_last_measurement < LOADCELL_POLLING_INTERVAL)
+  if (!loadcell.is_ready())
+    return;
+
+  if (millis() - loadcell_last_measurement < LOADCELL_POLLING_INTERVAL)
     return;
 
   float measure_avg = loadcell.get_units(5);
   float measure = loadcell.get_units(1);
   float ratio = measure / measure_avg;
 
-  // Serial.print("Measure: ");
-  // Serial.print(measure);
-  // Serial.print(", avg: ");
-  // Serial.print(measure_avg);
-  // Serial.print(", ratio: ");
-  // Serial.println(ratio);
+  if (ratio < 0.9 && ratio > 1.1)
+    return;
 
-  if (ratio > 0.9 && ratio < 1.1) {
-    weight = measure_avg;
-    setWeight(weight);
+  if (measure < MIN_WEIGHT) {
+    weight_offset = measure;
+  } else {
+    Serial.print("Loadcell: ");
+    Serial.print(measure);
+    Serial.print("g");
+    Serial.print(" (offset: ");
+    Serial.print(weight_offset);
+    Serial.println("g)");
   }
+
+  weight = measure - weight_offset;
+
+  setWeight(weight);
 }
 
 float getLoadcellValue() {

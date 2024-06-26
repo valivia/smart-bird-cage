@@ -17,6 +17,7 @@ static bool is_display_initialized = false;
 float display_weight = -1.0;
 int display_light = -1.0;
 float display_temperature = -1.0;
+bool updating = false;
 bool has_changed = false;
 
 bool setupDisplay() {
@@ -52,6 +53,11 @@ void runDisplayLoop() {
   display.setCursor(0, 26);
   display.println("Temperature: " + String(display_temperature) + "C");
 
+  if (updating) {
+    display.setCursor(0, 36);
+    display.println("Updating...");
+  }
+
   display.display();
   has_changed = false;
 }
@@ -69,4 +75,9 @@ void setLight(int light) {
 void setTemperature(float temperature) {
   has_changed = temperature != display_temperature;
   display_temperature = temperature;
+}
+
+void setUpdating(bool state) {
+  updating = state;
+  has_changed = true;
 }
