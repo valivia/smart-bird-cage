@@ -15,7 +15,7 @@ static bool is_radar_initialized = false;
 
 bool setupRadar(void) {
   RADAR_SERIAL.begin(256000, SERIAL_8N1, RADAR_RX_PIN, RADAR_TX_PIN);
-  // delay(500);
+  delay(500);
   if (radar.begin(RADAR_SERIAL)) {
     is_radar_initialized = true;
   }
