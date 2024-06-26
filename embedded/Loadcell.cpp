@@ -1,4 +1,5 @@
 #include "HX711.h"
+#include "Display.h"
 
 // ## Esp side:
 // vcc = 5V
@@ -15,55 +16,44 @@
 // NOTE not done, unreliable method
 static HX711 loadcell;
 static float weight = 0.0;
-static float max_weight = 0.0;
-static float weight_measure_1 = 0.0;
-static float weight_measure_2 = 0.0;
-static float weight_measure_3 = 0.0;
-static float weight_measure_4 = 0.0;
-static float weight_measure_5 = 0.0;
-static float avg_weight_measure = 0.0;
+
 static bool is_loadcell_initialized = false;
 static unsigned long loadcell_last_measurement = 0;
 
-bool setupLoadcell()
-{
+bool setupLoadcell() {
   loadcell.begin(DATA_PIN, CLOCK_PIN);
   // Calibrated using "HX_Calibration" from "HX711.h" library
   loadcell.set_offset(55637);
   loadcell.set_scale(477.479980);
-  Serial.println("Loadcell: Sensor initialized.");
-  is_loadcell_initialized = true;
+  loadcell.set_runavg_mode();
 
+  is_loadcell_initialized = true;
   return is_loadcell_initialized;
 }
 
-void runLoadcellLoop()
-{
-  if (!is_loadcell_initialized)
-    return;
-
+void runLoadcellLoop() {
   if (!loadcell.is_ready() || millis() - loadcell_last_measurement < LOADCELL_POLLING_INTERVAL)
     return;
 
-  weight_measure_1 = weight_measure_2;
-  weight_measure_2 = weight_measure_3;
-  weight_measure_3 = weight_measure_4;
-  weight_measure_4 = weight_measure_5;
-  weight_measure_5 = loadcell.get_units(5);
-  avg_weight_measure = (weight_measure_1 + weight_measure_2 + weight_measure_3 + weight_measure_4 + weight_measure_5) / 5;
+  float measure_avg = loadcell.get_units(5);
+  float measure = loadcell.get_units(1);
+  float ratio = measure / measure_avg;
 
-  if ((avg_weight_measure / weight_measure_5) > 0.9 && (avg_weight_measure / weight_measure_5) < 1.1){
-    weight = avg_weight_measure;
-  }
+  // Serial.print("Measure: ");
+  // Serial.print(measure);
+  // Serial.print(", avg: ");
+  // Serial.print(measure_avg);
+  // Serial.print(", ratio: ");
+  // Serial.println(ratio);
 
-  if (weight > max_weight){
-    max_weight = weight;
+  if (ratio > 0.9 && ratio < 1.1) {
+    weight = measure_avg;
+    setWeight(weight);
   }
 }
 
-float getLoadcellValue()
-{
-  float temp_max_weight = max_weight;
-  max_weight = 0.0; // Reset max_weight to 0 after returning the value
+float getLoadcellValue() {
+  float temp_max_weight = weight;
+  weight = 0.0;  // Reset max_weight to 0 after returning the value
   return temp_max_weight;
 }

@@ -49,7 +49,6 @@ bool setupMicrophone() {
   // I2S setup
   i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
   i2s_set_pin(I2S_NUM_0, &i2s_mic_pins);
-  Serial.println("Microphone: Sensor initialized.");
   is_microphone_initialized = true;
   return is_microphone_initialized;
 }
@@ -57,7 +56,6 @@ bool setupMicrophone() {
 int32_t raw_samples[SAMPLE_BUFFER_SIZE];
 
 void runMicrophoneLoop() {
-  if (!is_microphone_initialized) return;
   int max_amplitude = 0;
 
   // Read from the I2S device

@@ -14,39 +14,59 @@ Adafruit_SSD1306 display(DISPLAY_SCREEN_WIDTH, DISPLAY_SCREEN_HEIGHT, &Wire, -1)
 
 static bool is_display_initialized = false;
 
+float display_weight = -1.0;
+int display_light = -1.0;
+float display_temperature = -1.0;
+bool has_changed = false;
+
 bool setupDisplay() {
   Wire.begin(DISPLAY_DATA_PIN, DISPLAY_CLOCK_PIN);
 
   if (display.begin(SSD1306_SWITCHCAPVCC, DISPLAY_ADDRESS)) {
-    Serial.println("Display: Module initialized.");
     is_display_initialized = true;
   } else {
-    Serial.println("Display: Could not initialize module.");
     return false;
   }
 
   display.clearDisplay();
-  display.setFont(&FreeSans9pt7b);
   display.setTextSize(1);
   display.setTextColor(WHITE);
-  display.setCursor(0, (DISPLAY_SCREEN_HEIGHT / 2));
+  display.setCursor(0, 6);
   display.println("Booting up...");
   display.display();
 
   return is_display_initialized;
 }
 
-void displayValues(float weight) {
-  if (!is_display_initialized)
+void runDisplayLoop() {
+  if (!has_changed)
     return;
 
   display.clearDisplay();
-  display.setCursor(0, (DISPLAY_SCREEN_HEIGHT / 2));
-  if (weight == 0){
-    display.println("No bird :(");
-  } else {
-    display.print("Weight:");
-    display.println(weight);
-  }
+  display.setCursor(0, 6);
+  display.println("Weight: " + String(display_weight) + "g");
+
+  display.setCursor(0, 16);
+  display.println("Light: " + String(display_light) + "lux");
+
+  display.setCursor(0, 26);
+  display.println("Temperature: " + String(display_temperature) + "C");
+
   display.display();
+  has_changed = false;
+}
+
+void setWeight(float weight) {
+  has_changed = weight != display_weight;
+  display_weight = weight;
+}
+
+void setLight(int light) {
+  has_changed = light != display_light;
+  display_light = light;
+}
+
+void setTemperature(float temperature) {
+  has_changed = temperature != display_temperature;
+  display_temperature = temperature;
 }

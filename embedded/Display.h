@@ -1,2 +1,5 @@
 bool setupDisplay();
-void displayValues(float weight);
+void setWeight(float weight);
+void setLight(int light);
+void setTemperature(float temperature);
+void runDisplayLoop();

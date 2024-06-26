@@ -3,61 +3,60 @@
 #include <WiFiClientSecure.h>
 #include "Credentials.h"
 
-void setupWiFi()
-{
-    WiFi.begin(ssid, password);
-    Serial.println("wifi: Connecting...");
+bool setupWiFi() {
+  WiFi.begin(ssid, password);
+  Serial.println("wifi: Connecting...");
 
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        delay(500);
-        Serial.print(".");
-    }
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
 
-    Serial.println("");
-    Serial.print("wifi: Connected to WiFi network with IP Address: ");
-    Serial.println(WiFi.localIP());
+  Serial.println("");
+  Serial.print("wifi: Connected to WiFi network with IP Address: ");
+  Serial.println(WiFi.localIP());
+
+  return true;
 }
 
-void sendDataToServer(float temperature, float humidity, float weight, int movement, int light, int sound)
-{
-    // Check WiFi connection status
-    if (WiFi.status() != WL_CONNECTED)
-    {
-        Serial.println("Wifi: not connected");
-        return;
-    }
+void runWiFiLoop() {
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("wifi: Connection lost, reconnecting...");
+    setupWiFi();
+  }
+}
 
-    WiFiClientSecure client;
-    HTTPClient http;
+void sendDataToServer(float temperature, float humidity, float weight, int movement, int light, int sound) {
+  // Check WiFi connection status
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Wifi: not connected");
+    return;
+  }
 
-    client.setInsecure();
+  WiFiClientSecure client;
+  HTTPClient http;
 
-    http.begin(client, serverName);
-    http.addHeader("Content-Type", "application/json");
-    http.addHeader("Authorization", token);
+  client.setInsecure();
 
-    String weightString = String(weight);
-    if (weight < 40 || weight > 200) {
-        weightString = "null";
-    }
+  http.begin(client, serverName);
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("Authorization", token);
 
-    // Construct the JSON string
-    String httpRequestData = "{\"device_id\": " + String(device_id) +
-                             ",\"temperature\": " + String(temperature) +
-                             ",\"humidity\": " + String(humidity) +
-                             ",\"weight\": " + weightString +
-                             ",\"movement\": " + String(movement) +
-                             ",\"light\": " + String(light) +
-                             ",\"sound\": " + String(sound) + "}";
+  String weight_string = String(weight);
+  if (weight < 40 || weight > 200) {
+    weight_string = "null";
+  }
 
-    // Send the HTTP POST request
-    int httpResponseCode = http.POST(httpRequestData);
+  // Construct the JSON string
+  String http_request_data = "{\"device_id\": " + String(device_id) + ",\"temperature\": " + String(temperature) + ",\"humidity\": " + String(humidity) + ",\"weight\": " + weight_string + ",\"movement\": " + String(movement) + ",\"light\": " + String(light) + ",\"sound\": " + String(sound) + "}";
 
-    http.end();
+  // Send the HTTP POST request
+  int http_response_code = http.POST(http_request_data);
 
-    Serial.print("Wifi: HTTP response code: ");
-    Serial.println(httpRequestData);
-    Serial.print("Wifi: HTTP Request Data:");
-    Serial.println(httpResponseCode);
+  http.end();
+
+  Serial.print("Wifi: HTTP Request Data:");
+  Serial.println(http_request_data);
+  Serial.print("Wifi: HTTP response code: ");
+  Serial.println(http_response_code);
 }
