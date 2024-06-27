@@ -10,11 +10,11 @@ pub struct SensorData {
     pub device_id: i32,
 
     // Weight in grams, 5KG load cell
-    #[validate(range(min = 0.0, max = 5000.0))]
+    #[validate(range(min = 40.0, max = 200.0))]
     pub weight: Option<f32>,
 
-    // Amount of movements
-    #[validate(range(min = 0))]
+    // Movement score
+    #[validate(range(min = 0, max = 100))]
     pub movement: i32,
 
     // Amount of sounds measured
@@ -30,7 +30,7 @@ pub struct SensorData {
     pub humidity: f32,
 
     // Light in lux
-    #[validate(range(min = 0))]
+    #[validate(range(min = 0, max = 65535))]
     pub light: i32,
 }
 
