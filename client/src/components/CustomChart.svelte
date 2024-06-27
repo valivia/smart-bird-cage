@@ -62,7 +62,6 @@
           timePeriodData = yearDataValues
           break
       }
-      console.log(timePeriodData)
     }
 
     $: timePeriod && yearDataValues && overwriteData()
@@ -77,16 +76,12 @@
           show: false
         },
         animations: {
-          enabled: true
+          enabled: false
         }
       },
-      responsive: [{
-          breakpoint: 390,
-          options: {},
-      }],
       series: [
         {
-          name: `${name} (${unit})`,
+          name: `${name}${unit && ` (${unit})`}`,
           data: timePeriodData.length ? timePeriodData : data,
           color,
         }
