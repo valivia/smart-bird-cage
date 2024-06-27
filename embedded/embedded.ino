@@ -81,9 +81,9 @@ void pollSensors() {
 }
 
 void SummarizeAndUploadData() {
-  float temperature = measureTemperature();
+  float temperature = getTemperature();
   float humidity = getHumidity();
-  float weight = getTemperature();
+  float weight = getLoadcellValue();
   int movement = getRadarValue();
   int light = getLightvalue();
   int sound = getMicrophoneValue();
