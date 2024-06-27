@@ -12,14 +12,18 @@
 #define DATA_PIN 19
 #define CLOCK_PIN 18
 #define LOADCELL_POLLING_INTERVAL 1000
+#define LOADCELL_OFFSET 66579
+#define LOADCELL_SCALE 360.584747
 
-#define MAX_WEIGHT 200.0
-#define MIN_WEIGHT 40.0
+#define MAX_WEIGHT 120.0
+#define MIN_WEIGHT 60.0
 
-// NOTE not done, unreliable method
 static HX711 loadcell;
-static float weight = 0.0;
-static float weight_offset = 0.0;
+
+static float last_weight = 0.0;
+
+static float total_weight = 0.0;
+static int total_weight_count = 0;
 
 static bool is_loadcell_initialized = false;
 static unsigned long loadcell_last_measurement = 0;
@@ -27,8 +31,8 @@ static unsigned long loadcell_last_measurement = 0;
 bool setupLoadcell() {
   loadcell.begin(DATA_PIN, CLOCK_PIN);
   // Calibrated using "HX_Calibration" from "HX711.h" library
-  loadcell.set_offset(55637);
-  loadcell.set_scale(477.479980);
+  loadcell.set_offset(LOADCELL_OFFSET);
+  loadcell.set_scale(LOADCELL_SCALE);
   loadcell.set_runavg_mode();
 
   is_loadcell_initialized = true;
@@ -42,29 +46,31 @@ void runLoadcellLoop() {
   if (millis() - loadcell_last_measurement < LOADCELL_POLLING_INTERVAL)
     return;
 
-  float measure_avg = loadcell.get_units(5);
-  float measure = loadcell.get_units(1);
-  float ratio = measure / measure_avg;
+  float weight_measurement = loadcell.get_units(3);
+  float ratio = weight_measurement / last_weight;
+  last_weight = weight_measurement;
 
   if (ratio < 0.9 && ratio > 1.1)
     return;
 
-  if (measure < MIN_WEIGHT) {
-    weight_offset = measure;
-  } else {
-    Serial.print("Loadcell: ");
-    Serial.print(measure);
-    Serial.print("g");
-    Serial.print(" (offset: ");
-    Serial.print(weight_offset);
-    Serial.println("g)");
-    weight = measure - weight_offset;
-    setWeight(weight);
-  }
+  if (weight_measurement < MIN_WEIGHT)
+    return;
+
+  Serial.print("Loadcell: ");
+  Serial.print(weight_measurement);
+  Serial.println("g");
+  total_weight += weight_measurement;
+  total_weight_count++;
+  setWeight(weight_measurement);
 }
 
 float getLoadcellValue() {
-  float temp_max_weight = weight;
-  weight = 0.0;  // Reset max_weight to 0 after returning the value
-  return temp_max_weight;
+  float weight = total_weight / total_weight_count;
+  total_weight = 0.0;
+  total_weight_count = 0;
+
+  if (weight > MAX_WEIGHT || weight < MIN_WEIGHT)
+    return -1;
+
+  return weight;
 }

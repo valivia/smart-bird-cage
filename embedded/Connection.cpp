@@ -58,7 +58,7 @@ void sendDataToServer(float temperature, float humidity, float weight, int movem
   }
 
   String weight_string = String(weight);
-  if (weight < 40 || weight > 200) {
+  if (weight == -1) {
     weight_string = "null";
   }
 

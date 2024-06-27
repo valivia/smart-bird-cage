@@ -88,6 +88,8 @@ void SummarizeAndUploadData() {
   int light = getLightvalue();
   int sound = getMicrophoneValue();
 
+  setWeight(weight);
+
   // Send the data to the server
   unsigned long start = millis();
   sendDataToServer(temperature, humidity, weight, movement, light, sound);
