@@ -11,6 +11,7 @@
 #define DISPLAY_CLOCK_PIN 21
 
 #define DISPLAY_UPDATE_TIMEOUT 5000
+#define DISPLAY_SHUTOFF_LIGHT 10
 
 Adafruit_SSD1306 display(DISPLAY_SCREEN_WIDTH, DISPLAY_SCREEN_HEIGHT, &Wire, -1);
 
@@ -46,7 +47,7 @@ void runDisplayLoop() {
     return;
 
   // Turn off the display if the light is too low to protect the birds sleep
-  if (display_light < 20) {
+  if (display_light < DISPLAY_SHUTOFF_LIGHT) {
     display.clearDisplay();
     display.display();
     return;
