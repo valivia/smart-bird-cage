@@ -10,6 +10,10 @@
 #define I2S_MIC_LEFT_RIGHT_CLOCK GPIO_NUM_14  // WS
 #define I2S_MIC_SERIAL_DATA GPIO_NUM_13       // SD
 
+#define MICROPHONE_MAX_AMPLITUDE 1500000
+#define MICROPHONE_MIN_FREQUENCY 3000
+#define MICROPHONE_MAX_FREQUENCY 7000
+
 static int chirps = 0;
 static bool is_microphone_initialized = false;
 
@@ -80,7 +84,7 @@ void runMicrophoneLoop() {
   double peak_frequency = FFT.majorPeak();
 
   // Frequency calibrated with cockatiel noises
-  if (max_amplitude > 1000000 && peak_frequency >= 3000 && peak_frequency <= 7000) {
+  if (max_amplitude > MICROPHONE_MAX_AMPLITUDE && peak_frequency >= MICROPHONE_MIN_FREQUENCY && peak_frequency <= MICROPHONE_MAX_FREQUENCY) {
     chirps++;
   }
 }
