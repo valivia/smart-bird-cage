@@ -2,62 +2,82 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include "Credentials.h"
+#include "Display.h"
 
-void setupWiFi()
-{
-    WiFi.begin(ssid, password);
-    Serial.println("wifi: Connecting...");
+bool setupWiFi() {
+  WiFi.begin(ENV_SSID, ENV_PASSWORD);
+  Serial.println("wifi: Connecting...");
 
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        delay(500);
-        Serial.print(".");
-    }
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
 
-    Serial.println("");
-    Serial.print("wifi: Connected to WiFi network with IP Address: ");
-    Serial.println(WiFi.localIP());
+  Serial.println("");
+  Serial.print("wifi: Connected to WiFi network with IP Address: ");
+  Serial.println(WiFi.localIP());
+
+  return true;
 }
 
-void sendDataToServer(float temperature, float humidity, float weight, int movement, int light, int sound)
-{
-    // Check WiFi connection status
-    if (WiFi.status() != WL_CONNECTED)
-    {
-        Serial.println("Wifi: not connected");
-        return;
-    }
+void runWiFiLoop() {
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("wifi: Connection lost, reconnecting...");
+    setupWiFi();
+  }
+}
 
-    WiFiClientSecure client;
-    HTTPClient http;
+void sendDataToServer(float temperature, float humidity, float weight, int movement, int light, int sound) {
+  // Check WiFi connection status
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Wifi: not connected");
+    return;
+  }
 
-    client.setInsecure();
+  setUpdating(true);
+  runDisplayLoop();
 
-    http.begin(client, serverName);
-    http.addHeader("Content-Type", "application/json");
-    http.addHeader("Authorization", token);
+  WiFiClientSecure client;
+  client.setInsecure();
+  client.setHandshakeTimeout(10);
 
-    String weightString = String(weight);
-    if (weight < 40 || weight > 200) {
-        weightString = "null";
-    }
+  HTTPClient http;
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("Authorization", ENV_TOKEN);
+  http.setTimeout(5000);
+  http.setConnectTimeout(5000);
+  http.useHTTP10(true);
+  http.setReuse(false);
+  http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
 
-    // Construct the JSON string
-    String httpRequestData = "{\"device_id\": " + String(device_id) +
-                             ",\"temperature\": " + String(temperature) +
-                             ",\"humidity\": " + String(humidity) +
-                             ",\"weight\": " + weightString +
-                             ",\"movement\": " + String(movement) +
-                             ",\"light\": " + String(light) +
-                             ",\"sound\": " + String(sound) + "}";
+  if (http.begin(client, ENV_SERVER_NAME)) {
+    Serial.println("Wifi: Connected to server");
+  } else {
+    Serial.println("Wifi: Failed to connect to server");
+    return;
+  }
 
-    // Send the HTTP POST request
-    int httpResponseCode = http.POST(httpRequestData);
+  String weight_string = String(weight);
+  if (weight < 40 || weight > 200) {
+    weight_string = "null";
+  }
 
-    http.end();
+  // Construct the JSON string
+  String http_request_data = "{\"device_id\": " + String(ENV_DEVICE_ID) + ",\"temperature\": " + String(temperature) + ",\"humidity\": " + String(humidity) + ",\"weight\": " + weight_string + ",\"movement\": " + String(movement) + ",\"light\": " + String(light) + ",\"sound\": " + String(sound) + "}";
 
-    Serial.print("Wifi: HTTP response code: ");
-    Serial.println(httpRequestData);
-    Serial.print("Wifi: HTTP Request Data:");
-    Serial.println(httpResponseCode);
+  // Send the HTTP POST request
+  int http_response_code = http.POST(http_request_data);
+
+  http.end();
+
+  Serial.print("Wifi: HTTP Request Data:");
+  Serial.println(http_request_data);
+  Serial.print("Wifi: HTTP response code: ");
+  Serial.println(http_response_code);
+  if (http_response_code < 0) {
+    Serial.println(http.errorToString(http_response_code));
+    Serial.println(http.getString());
+  }
+
+  setUpdating(false);
 }

@@ -15,20 +15,15 @@ static bool is_radar_initialized = false;
 
 bool setupRadar(void) {
   RADAR_SERIAL.begin(256000, SERIAL_8N1, RADAR_RX_PIN, RADAR_TX_PIN);
-  // delay(500);
+  delay(500);
   if (radar.begin(RADAR_SERIAL)) {
-    Serial.println("Radar: Sensor initialized.");
     is_radar_initialized = true;
-  } else {
-    Serial.println("Radar: Failed to initialize sensor.");
   }
 
   return is_radar_initialized;
 }
 
 void runRadarLoop() {
-  if (!is_radar_initialized)
-    return;
   radar.read();
 
   // Check if it is time to read the sensor
@@ -37,24 +32,24 @@ void runRadarLoop() {
 
   radar_last_measurement = millis();
 
-  if (radar.presenceDetected()) {
-    if (radar.stationaryTargetDetected()) {
-      Serial.print(F("Stationary target: "));
-      Serial.print(radar.stationaryTargetDistance());
-      Serial.print(F("cm energy:"));
-      Serial.print(radar.stationaryTargetEnergy());
-      Serial.print(' ');
-    }
-    if (radar.movingTargetDetected()) {
-      Serial.print(F("Moving target: "));
-      Serial.print(radar.movingTargetDistance());
-      Serial.print(F("cm energy:"));
-      Serial.print(radar.movingTargetEnergy());
-    }
-    Serial.println();
-  } else {
-    Serial.println(F("No target"));
-  }
+  // if (radar.presenceDetected()) {
+  //   if (radar.stationaryTargetDetected()) {
+  //     Serial.print(F("Stationary target: "));
+  //     Serial.print(radar.stationaryTargetDistance());
+  //     Serial.print(F("cm energy:"));
+  //     Serial.print(radar.stationaryTargetEnergy());
+  //     Serial.print(' ');
+  //   }
+  //   if (radar.movingTargetDetected()) {
+  //     Serial.print(F("Moving target: "));
+  //     Serial.print(radar.movingTargetDistance());
+  //     Serial.print(F("cm energy:"));
+  //     Serial.print(radar.movingTargetEnergy());
+  //   }
+  //   Serial.println();
+  // } else {
+  //   Serial.println(F("No target"));
+  // }
 
 
   int radar_score = radar.movingTargetEnergy();
