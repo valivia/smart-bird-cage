@@ -15,8 +15,8 @@
 #define LOADCELL_OFFSET 66579
 #define LOADCELL_SCALE 360.584747
 
-#define MAX_WEIGHT 120.0
-#define MIN_WEIGHT 60.0
+#define MAX_WEIGHT 110.0
+#define MIN_WEIGHT 70.0
 
 static HX711 loadcell;
 
@@ -47,30 +47,32 @@ void runLoadcellLoop() {
     return;
 
   float weight_measurement = loadcell.get_units(3);
+
+  if (weight_measurement < MIN_WEIGHT)
+    return;
+
   float ratio = weight_measurement / last_weight;
   last_weight = weight_measurement;
 
   if (ratio < 0.9 && ratio > 1.1)
     return;
 
-  if (weight_measurement < MIN_WEIGHT)
-    return;
-
-  Serial.print("Loadcell: ");
-  Serial.print(weight_measurement);
-  Serial.println("g");
   total_weight += weight_measurement;
   total_weight_count++;
+
   setWeight(weight_measurement);
 }
 
 float getLoadcellValue() {
-  float weight = total_weight / total_weight_count;
+  if (total_weight_count == 0)
+    return -1;
+
+  float average_weight = total_weight / total_weight_count;
   total_weight = 0.0;
   total_weight_count = 0;
 
-  if (weight > MAX_WEIGHT || weight < MIN_WEIGHT)
+  if (average_weight > MAX_WEIGHT || average_weight < MIN_WEIGHT)
     return -1;
 
-  return weight;
+  return average_weight;
 }
