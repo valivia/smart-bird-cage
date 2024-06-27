@@ -41,7 +41,7 @@ pub async fn get(
                     FROM data
                     WHERE device_id = $1 AND time >= $2 AND time <= $3
                     GROUP BY {interval_str}
-                    ORDER BY {interval_str}
+                    ORDER BY {interval_str} ASC
                 "#,
                 interval_str = grouping_interval.to_sql(),
             );
@@ -63,6 +63,7 @@ pub async fn get(
                 SELECT time, movement, sound, weight, temperature, humidity, light
                 FROM data
                 WHERE device_id = $1 AND time >= $2 AND time <= $3
+                ORDER BY time ASC
             "#,
             device_info.id,
             DateTime::from_timestamp(start.unwrap_or(0), 0).unwrap(),
