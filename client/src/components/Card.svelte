@@ -3,7 +3,7 @@
   import { InfoCircleSolid, ChevronDownOutline} from 'flowbite-svelte-icons';
 
   export let name: string;
-  export let description: string;
+  export let description: string | undefined;
   export let timePeriod: string;
   
   let dropdownOpen = false;
@@ -22,8 +22,8 @@
     <h2 class="inline-flex items-center mb-10 text-3xl font-bold leading-none text-gray-900 dark:text-white">
       {name}
       {#if description}
-      <InfoCircleSolid id="b1" class="w-3 h-3 text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-white ms-1" />
-      <Popover triggeredBy="#b1" class="z-10 text-sm text-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400">
+      <InfoCircleSolid id={name} class="w-3 h-3 text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-white ms-1" />
+      <Popover triggeredBy={`#${name}`} class="z-10 text-sm text-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400">
         <div class="p-3 space-y-2">
           <h3 class="font-semibold text-gray-900 dark:text-white">{name} Measurement</h3>
           <p>{description}</p>
