@@ -31,6 +31,7 @@
 
     let movementDescription: string = 'Intensity of movement where 0 is no movement and 100 is constant movement'
     let weightDescription: string = 'Weight in grams, only measured when bird is on scale'
+    let lightDescription: string = 'Light in LUX on a logarithmic scale'
 
     const mapData = () => {
         timeStamps = data.map(({ time }) => new Date(time).toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit', hour12: false}));
@@ -74,9 +75,9 @@
     <div class="flex justify-center w-full">
         <div class="grid gap-10 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-[2560px] w-full">
             <CustomChart name='Humidity' unit='%' data={humidityValues} {timeStamps} {timePeriod} min={0} max={100} color='#1A56DB' />
-            <CustomChart name='Temperature' unit='°C' data={temperatureValues} {timeStamps} {timePeriod}  color='#f05252' />
-            <CustomChart name='Light' unit='LUX' data={lightValues} {timeStamps} {timePeriod} color='#6af7bb'  />
-            <CustomChart name='Weight' description={weightDescription} unit='g' data={weightValues} {timeStamps} {timePeriod} color='#be8fff'  />
+            <CustomChart name='Temperature' unit='°C' data={temperatureValues} {timeStamps} {timePeriod} color='#f05252' />
+            <CustomChart name='Light' unit='LUX' description={lightDescription} data={lightValues} {timeStamps} {timePeriod} min={0} color='#6af7bb' logarithmic  />
+            <CustomChart name='Weight' unit='g' description={weightDescription} data={weightValues} {timeStamps} {timePeriod} color='#be8fff'  />
             <CustomChart name='Movement' description={movementDescription} data={movementValues} {timeStamps} {timePeriod} color='#fdba3c' />
             <CustomChart name='Sound' unit='amount' data={soundValues} {timeStamps} {timePeriod} color='#5deffe' />
         </div>
