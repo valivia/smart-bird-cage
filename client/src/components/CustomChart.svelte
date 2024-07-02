@@ -14,6 +14,7 @@
     export let max: number | undefined = undefined;
     export let stepSize: number | undefined = undefined;
     export let color: string;
+    export let logarithmic: boolean = false;
     
     export let data: number[] = [];
     export let timeStamps: string[];
@@ -81,7 +82,7 @@
       },
       series: [
         {
-          name: `${name}${unit && ` (${unit})`}`,
+          name: `${name}${unit ? ` (${unit})` : ''}`,
           data: timePeriodData.length ? timePeriodData : data,
           color,
         }
@@ -127,6 +128,7 @@
       },
       yaxis: {
         show: true,
+        logarithmic,
         min,
         max,
         stepSize,
